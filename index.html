@@ -167,6 +167,33 @@
       pointer-events: none;
       z-index: 1;
     }
+
+    /* === NEW: 复制按钮 & 提示 === */
+    #rewardPopup .copy-btn {
+      margin-top: 12px;
+      padding: 10px 20px;
+      background: #28a745;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      z-index: 10001;
+      position: relative;
+    }
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: .95em;
+      display: none;
+      z-index: 10000;
+    }
   </style>
 </head>
 <body>
@@ -196,7 +223,10 @@
     Bonus!<br/>
     <div id="captchaCode"></div>
     <p style="color: #ff4444; font-weight: bold;">🚨 Please Screenshot and send to admin.</p>
-    <a href="https://explore777.netlify.app/" target="_blank" onclick="stopMusic()">Claim Now</a>
+
+    <!-- === CHANGED: 原来的 <a> 改为复制按钮 + 提示层 === -->
+    <button class="copy-btn" onclick="copyCode()">Copy Verification Code</button>
+    <div id="toast">Copied!</div>
   </div>
 
   <img id="companyLogo" src="https://img.capalangresource.com/images/public/cpwl/banner/WLLB7/GENERAL/banner_20250426050341681.webp">
@@ -340,6 +370,7 @@
         const captchaEl = document.getElementById('captchaCode');
         animateNumber(numberEl, reward);
         captchaEl.textContent = `Verification Code: ${captchaCode}`;
+        captchaEl.dataset.code = captchaCode; // === NEW: 供复制按钮使用（纯验证码）
         localStorage.setItem("hasClaimedReward", "1");
         packet.remove();
       };
@@ -366,6 +397,49 @@
         location.reload();
       }
     });
+
+    // === NEW: 复制验证码功能（不改你原有逻辑） ===
+    function copyCode() {
+      const el = document.getElementById('captchaCode');
+      const code = el?.dataset?.code || '';
+      if (!code) {
+        showToast('No code yet.');
+        return;
+      }
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(code)
+          .then(() => showToast('Verification code copied'))
+          .catch(() => fallbackCopy(code));
+      } else {
+        fallbackCopy(code);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Verification code copied');
+      } catch (e) {
+        showToast('Copy failed, long-press to select');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      if (!t) return;
+      t.textContent = msg || 'Copied!';
+      t.style.display = 'block';
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => (t.style.display = 'none'), 1500);
+    }
   </script>
 </body>
 </html>
