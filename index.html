@@ -133,7 +133,9 @@
                    0 0 30px rgba(255, 215, 0, 0.9);
       font-weight: bold;
     }
+    /* 默认先隐藏验证码（动画结束再显示） */
     #captchaCode {
+      display: none;
       margin-top: 12px;
       font-size: 1.2em;
       letter-spacing: 0.15em;
@@ -141,7 +143,6 @@
       background: #300040;
       padding: 6px 12px;
       border-radius: 6px;
-      display: inline-block;
       font-weight: bold;
       color: #FFD700;
       text-shadow: 0 0 5px #FFA500;
@@ -224,7 +225,7 @@
     <div id="captchaCode"></div>
     <p style="color: #ff4444; font-weight: bold;">🚨 Please Screenshot and send to admin.</p>
 
-    <!-- === CHANGED: 原来的 <a> 改为复制按钮 + 提示层 === -->
+    <!-- 复制验证码按钮 + 提示层 -->
     <button class="copy-btn" onclick="copyCode()">Copy Verification Code</button>
     <div id="toast">Copied!</div>
   </div>
@@ -259,7 +260,7 @@
       useFetchStreams: false
     });
 
-    // 🔧 新增：本页面所属的公司 & 页面（按需要改成 SGB/RYB、page2/page3）
+    // 🔧 本页面所属的公司 & 页面
     const companyId = "LB7";
     const pageId = "page1";
 
@@ -314,21 +315,103 @@
       }
     }
 
-    function animateNumber(el, target, duration = 800) {
-      let start = 0;
-      let startTime = null;
-      function step(timestamp) {
-        if (!startTime) startTime = timestamp;
-        let progress = Math.min((timestamp - startTime) / duration, 1);
-        el.textContent = (start + (target - start) * progress).toFixed(2);
-        if (progress < 1) {
-          requestAnimationFrame(step);
-        }
+    /* === SLOT式先快后慢 + 轻微超冲回落；动画结束触发 onComplete === */
+    function animateNumber(el, target, duration = 2400, onComplete) {
+      duration = Math.max(duration, 1800);
+      target = Number(target) || 0;
+
+      const currentText = (el.textContent || "").replace(/[^0-9.\-]/g, "");
+      let startVal = parseFloat(currentText);
+      if (isNaN(startVal)) startVal = 0;
+
+      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        el.textContent = new Intl.NumberFormat("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}).format(target);
+        if (typeof onComplete === "function") onComplete();
+        return;
       }
+
+      if (el.__raf) cancelAnimationFrame(el.__raf);
+      if (el.__slotTimer) clearTimeout(el.__slotTimer);
+
+      // 触发原有 bounce 动效
       el.classList.remove("bounce");
       void el.offsetWidth;
       el.classList.add("bounce");
-      requestAnimationFrame(step);
+
+      const fmt = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const startTime = performance.now();
+      const endTime   = startTime + duration;
+      const finalPhaseMs = Math.min(700, duration * 0.35);
+      let interval = 18;
+      const slowFactor = 1.08;
+      const maxInterval = 150;
+
+      function noisyValue(progress) {
+        const spread = 0.15 + (1 - progress) * 0.85;
+        const min = Math.min(startVal, target) * (1 - spread);
+        const max = Math.max(startVal, target) * (1 + spread) + 0.01;
+        return Math.random() * (max - min) + min;
+      }
+
+      const tickLoop = () => {
+        const now = performance.now();
+        const remaining = endTime - now;
+        if (remaining <= finalPhaseMs) {
+          return smoothFinish();
+        }
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / (duration - finalPhaseMs), 1);
+        el.textContent = fmt.format(noisyValue(progress));
+        interval = Math.min(interval * slowFactor, maxInterval);
+        el.__slotTimer = setTimeout(tickLoop, interval);
+      };
+
+      function smoothFinish() {
+        const currentText = (el.textContent || "").replace(/[^0-9.\-]/g, "");
+        let from = parseFloat(currentText);
+        if (isNaN(from)) from = startVal;
+
+        const start = performance.now();
+        const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+        const step = (now) => {
+          const p = Math.min((now - start) / finalPhaseMs, 1);
+          const eased = easeOutCubic(p);
+          const val = from + (target - from) * eased;
+          el.textContent = fmt.format(val);
+
+          if (p < 1) {
+            el.__raf = requestAnimationFrame(step);
+          } else {
+            // === Overshoot: 超一点点(约1.5%)再回落到目标 ===
+            const overshootTarget = target * 1.015;
+            const overshootStart = performance.now();
+            const overshootDuration = 180; // 150–200ms 均可
+            const easeOutBack = t => 1 - Math.pow(1 - t, 2.5);
+
+            const overshootStep = (now2) => {
+              const p2 = Math.min((now2 - overshootStart) / overshootDuration, 1);
+              const eased2 = easeOutBack(p2);
+              const val2 = overshootTarget + (target - overshootTarget) * eased2;
+              el.textContent = fmt.format(val2);
+
+              if (p2 < 1) {
+                el.__raf = requestAnimationFrame(overshootStep);
+              } else {
+                el.textContent = fmt.format(target); // 对齐最终值
+                el.__raf = null;
+                if (typeof onComplete === "function") onComplete();
+              }
+            };
+            requestAnimationFrame(overshootStep);
+          }
+        };
+
+        el.__raf = requestAnimationFrame(step);
+      }
+
+      // 启动跳数阶段
+      tickLoop();
     }
 
     function createRedPacket() {
@@ -364,13 +447,19 @@
             console.error("Error saving reward:", error);
           });
 
-        // 显示弹窗及验证码
+        // 弹窗 + 数字动画；验证码等动画完成后才显示
         document.getElementById('rewardPopup').style.display = 'block';
         const numberEl = document.getElementById('rewardNumber');
         const captchaEl = document.getElementById('captchaCode');
-        animateNumber(numberEl, reward);
-        captchaEl.textContent = `Verification Code: ${captchaCode}`;
-        captchaEl.dataset.code = captchaCode; // === NEW: 供复制按钮使用（纯验证码）
+
+        captchaEl.style.display = "none"; // 先隐藏
+        animateNumber(numberEl, reward, 2400, () => {
+          // 动画结束时才显示验证码
+          captchaEl.textContent = `Verification Code: ${captchaCode}`;
+          captchaEl.dataset.code = captchaCode; // 供复制用（纯验证码）
+          captchaEl.style.display = "inline-block";
+        });
+
         localStorage.setItem("hasClaimedReward", "1");
         packet.remove();
       };
@@ -398,7 +487,7 @@
       }
     });
 
-    // === NEW: 复制验证码功能（不改你原有逻辑） ===
+    // === 复制验证码功能 ===
     function copyCode() {
       const el = document.getElementById('captchaCode');
       const code = el?.dataset?.code || '';
