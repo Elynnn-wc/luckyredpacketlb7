@@ -323,6 +323,8 @@
           .collection("pages").doc(pageId)
           .collection("rewards").doc(captchaCode)
           .set({
+            companyId,
+            pageId,
             rewardAmount: reward,
             captchaCode: captchaCode,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
