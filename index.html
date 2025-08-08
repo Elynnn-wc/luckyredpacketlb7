@@ -223,11 +223,15 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // ✅ 长轮询设置（保留原有）：规避某些网络下的 400
+    // ✅ 长轮询设置（规避某些网络下的 400）
     db.settings({
       experimentalForceLongPolling: true,
       useFetchStreams: false
     });
+
+    // 🔧 新增：本页面所属的公司 & 页面（按需要改成 SGB/RYB、page2/page3）
+    const companyId = "LB7";
+    const pageId = "page1";
 
     let gameStarted = false;
     const rewards = [
@@ -314,16 +318,19 @@
         const reward = getRandomReward();
         const captchaCode = generateCaptchaCode();
 
-        // 存储到 Firebase（rewards 集合）— 使用验证码作为文档ID，防重复
-        db.collection("rewards").doc(captchaCode).set({
-          rewardAmount: reward,
-          captchaCode: captchaCode,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-          console.log("Reward saved to Firebase:", reward, captchaCode);
-        }).catch((error) => {
-          console.error("Error saving reward to Firebase:", error);
-        });
+        // 存储到 Firebase（按公司/页面分区）— 文档ID使用验证码，天然防重复
+        db.collection("companies").doc(companyId)
+          .collection("pages").doc(pageId)
+          .collection("rewards").doc(captchaCode)
+          .set({
+            rewardAmount: reward,
+            captchaCode: captchaCode,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          }).then(() => {
+            console.log("Reward saved:", companyId, pageId, captchaCode);
+          }).catch((error) => {
+            console.error("Error saving reward:", error);
+          });
 
         // 显示弹窗及验证码
         document.getElementById('rewardPopup').style.display = 'block';
