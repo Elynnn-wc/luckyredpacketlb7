@@ -223,7 +223,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // ✅ 仅新增的两行（不改动你的原逻辑）：强制长轮询，规避某些网络下的 400
+    // ✅ 长轮询设置（保留原有）：规避某些网络下的 400
     db.settings({
       experimentalForceLongPolling: true,
       useFetchStreams: false
@@ -247,7 +247,7 @@
       }
     }
 
-    // 生成6位随机验证码（数字+大写字母）
+    // 生成7位随机验证码（数字+大写字母）
     function generateCaptchaCode() {
       const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
       let code = "";
@@ -314,8 +314,8 @@
         const reward = getRandomReward();
         const captchaCode = generateCaptchaCode();
 
-        // 存储到 Firebase（rewards 集合）
-        db.collection("rewards").add({
+        // 存储到 Firebase（rewards 集合）— 使用验证码作为文档ID，防重复
+        db.collection("rewards").doc(captchaCode).set({
           rewardAmount: reward,
           captchaCode: captchaCode,
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
