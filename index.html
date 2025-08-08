@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Caishen Bonus Rain</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: url('https://img.freepik.com/free-vector/watercolor-sugar-cotton-clouds-background_79603-2380.jpg?semt=ais_hybrid&w=740') no-repeat center center;
+      background-size: cover;
+      font-family: sans-serif;
+      height: 100vh;
+      width: 100vw;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(white 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.12;
+      z-index: 0;
+      pointer-events: none;
+    }
+    #noticeOverlay {
+      position: fixed;
+      z-index: 10000;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.88);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      flex-direction: column;
+    }
+    #noticeBox {
+      background: #4b1c9c;
+      padding: 30px 50px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.2);
+      text-align: center;
+    }
+    #noticeBox h2 { margin: 0 0 12px; }
+    #noticeBox button {
+      margin-top: 20px;
+      padding: 10px 24px;
+      font-size: 1.1em;
+      background: #6e3ad8;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+    }
+    #caishen {
+      position: absolute;
+      top: 10%;
+      left: 0;
+      width: 240px;
+      height: 300px;
+      background: url('https://i.postimg.cc/qBDyW26y/00243643-2.png') no-repeat center center;
+      background-size: contain;
+      animation: moveLeftRight 6s ease-in-out infinite alternate;
+      z-index: 10;
+    }
+    @keyframes moveLeftRight {
+      from { left: 0; }
+      to { left: calc(100% - 120px); }
+    }
+    .red-packet {
+      position: absolute;
+      width: 80px;
+      height: 90px;
+      background: url('https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png') no-repeat center center;
+      background-size: contain;
+      cursor: pointer;
+      z-index: 5;
+    }
+    #rewardPopup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(20, 0, 40, 0.95);
+      padding: 20px 30px 50px 30px;
+      border-radius: 10px;
+      display: none;
+      font-size: 1.5em;
+      z-index: 9999;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+      color: white;
+    }
+    #rewardPopup a {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 10px 20px;
+      background: #6e3ad8;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      z-index: 10001;
+      position: relative;
+    }
+    #rewardPopup .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      color: #ff4444;
+      font-size: 1.5em;
+      cursor: pointer;
+      font-weight: bold;
+      z-index: 10002;
+      user-select: none;
+    }
+    @keyframes bounceScale {
+      0% { transform: scale(1); }
+      30% { transform: scale(1.5); }
+      60% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+    .bounce {
+      display: inline-block;
+      animation: bounceScale 0.6s ease;
+    }
+    .gold-text {
+      background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8),
+                   0 0 20px rgba(255, 165, 0, 0.6),
+                   0 0 30px rgba(255, 215, 0, 0.9);
+      font-weight: bold;
+    }
+    #captchaCode {
+      margin-top: 12px;
+      font-size: 1.2em;
+      letter-spacing: 0.15em;
+      user-select: all;
+      background: #300040;
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      font-weight: bold;
+      color: #FFD700;
+      text-shadow: 0 0 5px #FFA500;
+    }
+    #bottomBanner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 150px;
+      background: url('https://img.capalangresource.com/images/public/cpwl/slideshow/WLLB7/GENERAL/slideshow_20250426022829742.gif') no-repeat center center;
+      background-size: cover;
+      z-index: 15;
+    }
+    #companyLogo {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      max-width: 100vw;
+      max-height: 100vh;
+      opacity: 0.85;
+      pointer-events: none;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <audio id="bgMusic" src="https://github.com/Elynnn-wc/my-music/raw/refs/heads/main/M500004LgwgG2HSyhE.mp3" loop></audio>
+
+  <div id="noticeOverlay">
+    <div id="noticeBox">
+      <h2>🧧 Welcome to Caishen Bonus Rain!</h2>
+      <p>Click on the red packets to claim your reward.<br/>
+        Maximum reward: <strong>SGD $20</strong><br/>
+        🎉 First-time users get <strong>SGD $10</strong> instantly!<br/>
+        👥 Invite 3 friends to get another <strong>SGD $10</strong> bonus.<br/>
+        <small>*T&C apply.</small>
+      </p>
+      <p style="color: #ff4444; font-weight: bold;">🚨 You can only claim the reward once per user.</p>
+      <button onclick="startGame()">Start</button>
+    </div>
+  </div>
+
+  <div id="caishen"></div>
+
+  <div id="rewardPopup">
+    <div class="close-btn" onclick="closeReward()">×</div>
+    🎉 You got SGD
+    <span class="gold-text">$</span>
+    <span id="rewardNumber" class="gold-text bounce">0.00</span>
+    Bonus!<br/>
+    <div id="captchaCode"></div>
+    <p style="color: #ff4444; font-weight: bold;">🚨 Please Screenshot and send to admin.</p>
+    <a href="https://explore777.netlify.app/" target="_blank" onclick="stopMusic()">Claim Now</a>
+  </div>
+
+  <img id="companyLogo" src="https://img.capalangresource.com/images/public/cpwl/banner/WLLB7/GENERAL/banner_20250426050341681.webp">
+
+  <div id="bottomBanner"></div>
+
+  <!-- Firebase SDK (compat 版，适合直接在 HTML 里用) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <!-- 如需开启 App Check（可选，建议上线前启用） -->
+  <!-- <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check-compat.js"></script> -->
+
+  <script>
+    // ====== Firebase 初始化（已接入你的项目配置）======
+    const firebaseConfig = {
+      apiKey: "AIzaSyBl0CeDXK9NN_KA4U8zs2A6MpxcX-lSyps",
+      authDomain: "caishenrain.firebaseapp.com",
+      projectId: "caishenrain",
+      storageBucket: "caishenrain.firebasestorage.app", // 只用 Firestore 的话，这个值无所谓
+      messagingSenderId: "474637588644",
+      appId: "1:474637588644:web:41875e52b1bf934abb2e31",
+      measurementId: "G-FP1ER2SM70"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // （可选）App Check：先在控制台启用 reCAPTCHA v3 并拿 site key，再取消注释
+    // self.FIREBASE_APPCHECK_DEBUG_TOKEN = true; // 本地调试用，上线前删掉
+    // const appCheck = firebase.appCheck();
+    // appCheck.activate('你的-reCAPTCHA-v3-site-key', true);
+
+    let gameStarted = false;
+    const rewards = [
+      { amount: 3.88, weight: 40 },
+      { amount: 5.88, weight: 30 },
+      { amount: 8.88, weight: 15 },
+      { amount: 16.88, weight: 10 },
+      { amount: 88.88, weight: 5 }
+    ];
+
+    function getRandomReward() {
+      const totalWeight = rewards.reduce((sum, r) => sum + r.weight, 0);
+      let random = Math.random() * totalWeight;
+      for (let r of rewards) {
+        if (random < r.weight) return r.amount;
+        random -= r.weight;
+      }
+    }
+
+    // 生成6位随机验证码（数字+大写字母）
+    function generateCaptchaCode() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let code = "";
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    function startGame() {
+      if (localStorage.getItem("hasClaimedReward")) {
+        alert("You have already claimed your reward.");
+        return;
+      }
+      document.getElementById('noticeOverlay').style.display = 'none';
+      gameStarted = true;
+      setInterval(createRedPacket, 300);
+      const bgMusic = document.getElementById('bgMusic');
+      if (bgMusic) {
+        bgMusic.volume = 0.5;
+        bgMusic.play().catch(() => console.warn("Music couldn't autoplay."));
+      }
+    }
+
+    function stopMusic() {
+      const bgMusic = document.getElementById('bgMusic');
+      if (bgMusic) {
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+      }
+    }
+
+    function animateNumber(el, target, duration = 800) {
+      let start = 0;
+      let startTime = null;
+      function step(timestamp) {
+        if (!startTime) startTime = timestamp;
+        let progress = Math.min((timestamp - startTime) / duration, 1);
+        el.textContent = (start + (target - start) * progress).toFixed(2);
+        if (progress < 1) {
+          requestAnimationFrame(step);
+        }
+      }
+      el.classList.remove("bounce");
+      void el.offsetWidth;
+      el.classList.add("bounce");
+      requestAnimationFrame(step);
+    }
+
+    function createRedPacket() {
+      if (!gameStarted) return;
+      const packet = document.createElement('div');
+      packet.className = 'red-packet';
+      packet.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+      packet.style.top = '-60px';
+      document.body.appendChild(packet);
+
+      packet.onclick = () => {
+        if (localStorage.getItem("hasClaimedReward")) {
+          alert("Reward already claimed.");
+          packet.remove();
+          return;
+        }
+        const reward = getRandomReward();
+        const captchaCode = generateCaptchaCode();
+
+        // 存储到 Firebase（rewards 集合）
+        db.collection("rewards").add({
+          rewardAmount: reward,
+          captchaCode: captchaCode,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        }).then(() => {
+          console.log("Reward saved to Firebase:", reward, captchaCode);
+        }).catch((error) => {
+          console.error("Error saving reward to Firebase:", error);
+        });
+
+        // 显示弹窗及验证码
+        document.getElementById('rewardPopup').style.display = 'block';
+        const numberEl = document.getElementById('rewardNumber');
+        const captchaEl = document.getElementById('captchaCode');
+        animateNumber(numberEl, reward);
+        captchaEl.textContent = `Verification Code: ${captchaCode}`;
+        localStorage.setItem("hasClaimedReward", "1");
+        packet.remove();
+      };
+
+      let top = -60;
+      const fall = setInterval(() => {
+        top += 4;
+        packet.style.top = top + 'px';
+        if (top > window.innerHeight) {
+          clearInterval(fall);
+          packet.remove();
+        }
+      }, 20);
+    }
+
+    function closeReward() {
+      document.getElementById('rewardPopup').style.display = 'none';
+    }
+
+    // 一键秒重置 Shift+R
+    document.addEventListener("keydown", function(e) {
+      if (e.shiftKey && e.key.toLowerCase() === "r") {
+        localStorage.clear();
+        location.reload();
+      }
+    });
+  </script>
+</body>
+</html>
