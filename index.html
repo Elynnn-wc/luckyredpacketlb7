@@ -62,7 +62,7 @@
   <div id="noticeOverlay">
     <div id="noticeBox">
       <h2>🧧 Play Guidelines</h2>
-      <p>Random Angpao every <strong>Wednesday</strong> from <strong>SGD $3.88</strong> to <strong>SGD $88.88</strong>.</p>
+      <p>Random Angpao every <strong id="openDayName">Wednesday</strong> from <strong>SGD $3.88</strong> to <strong>SGD $88.88</strong>.</p>
       <p class="small">Available once per user.</p>
       <p id="unlockMsg" class="small" style="margin-top:8px"></p>
       <button id="startBtn" disabled>Start</button>
@@ -108,7 +108,7 @@
     }
   } catch (err) { console.warn('Firebase init skipped:', err); }
 
-  /* ===== 识别公司/页面（page 只影响抽奖；样式按公司统一） ===== */
+  /* ===== 识别公司/页面（page 仅影响抽奖；样式按公司统一） ===== */
   const WORKER_URL = "https://caishen-draw.elynnn598.workers.dev";
   const q = new URLSearchParams(location.search);
 
@@ -132,22 +132,43 @@
   const { companyId, pageId } = detectContext();
   let gameStarted = false;
 
-  /* ===== 公司主题（当前只填了 LB7；其余待你给素材） ===== */
+  /* ===== 公司主题（支持可调 logoStyle / bannerStyle） ===== */
   const COMPANY_THEME = {
     LB7: {
       bg: "https://img.freepik.com/free-vector/watercolor-sugar-cotton-clouds-background_79603-2380.jpg",
       logoOverlay: "https://img.capalangresource.com/images/public/cpwl/banner/WLLB7/GENERAL/banner_20250426050341681.webp",
+      logoStyle: { maxWidth: "90vw", maxHeight: "90vh", opacity: "0.85", top: "50%", left: "50%", transform: "translate(-50%, -50%) scale(1)" },
+
       caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
       bottomBanner: "https://img.capalangresource.com/images/public/cpwl/slideshow/WLLB7/GENERAL/slideshow_20250426022829742.gif",
+      bannerStyle: { height: "150px", backgroundSize: "cover", backgroundPosition: "center" },
+
       packetImg: "https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png",
       coinImg: "https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png",
       colors: { bg: "#0b0b12", primary: "#F5C84B", accent: "#8128FF" },
     },
-    RYB: { bg:"",logoOverlay:"",caishenSprite:"",bottomBanner:"",packetImg:"",coinImg:"",colors:{bg:"#0A0E18",primary:"#FF5D5D",accent:"#1EC8FF"} },
-    SGB: { bg:"",logoOverlay:"",caishenSprite:"",bottomBanner:"",packetImg:"",coinImg:"",colors:{bg:"#081012",primary:"#26DB9A",accent:"#FFD166"} },
+    RYB: {
+      bg: "https://www.freevector.com/uploads/vector/preview/37239/vecteezy_Black-Gold-Geometric_Background_fv0321_generated.jpg",
+      logoOverlay: "https://i.postimg.cc/wMnJztTD/RYB-4-1.png",
+      logoStyle: { width: "60vw", maxWidth: "520px", top: "42%", left: "50%", transform: "translate(-50%, -50%)", opacity: "0.9" },
+
+      caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png", /* 暂共用 LB7 */
+      bottomBanner: "https://i.postimg.cc/NfPCybLx/RYB-3-1.png",
+      bannerStyle: { height: "120px", backgroundSize: "cover", backgroundPosition: "center" },
+
+      packetImg: "https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png",  /* 暂共用 LB7 */
+      coinImg: "https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png", /* 暂共用 LB7 */
+      colors: { bg: "#0A0E18", primary: "#ff7d4d", accent: "#f11010" }
+    },
+    SGB: {
+      bg:"", logoOverlay:"", logoStyle:{},
+      caishenSprite:"", bottomBanner:"", bannerStyle:{},
+      packetImg:"", coinImg:"",
+      colors:{ bg:"#081012", primary:"#26DB9A", accent:"#FFD166" }
+    }
   };
 
-  /* ===== 应用主题（按公司统一皮肤） ===== */
+  /* ===== 应用主题（按公司统一皮肤 + 可调样式） ===== */
   let COIN_IMG = "";
   function applyTheme() {
     const theme = COMPANY_THEME[companyId] || COMPANY_THEME.LB7;
@@ -155,17 +176,23 @@
     // 背景
     if (theme.bg) document.body.style.background = `url('${theme.bg}') center/cover no-repeat`;
 
-    // 叠加 logo
+    // 叠加 logo + 自定义样式
     const elLogo = document.getElementById("companyLogo");
-    if (elLogo && theme.logoOverlay) elLogo.src = theme.logoOverlay;
+    if (elLogo && theme.logoOverlay) {
+      elLogo.src = theme.logoOverlay;
+      if (theme.logoStyle) Object.assign(elLogo.style, theme.logoStyle);
+    }
 
     // 财神
     const elCai = document.getElementById("caishen");
     if (elCai && theme.caishenSprite) elCai.style.backgroundImage = `url('${theme.caishenSprite}')`;
 
-    // 底部 banner
+    // 底部 banner + 自定义样式
     const elBottom = document.getElementById("bottomBanner");
-    if (elBottom && theme.bottomBanner) elBottom.style.backgroundImage = `url('${theme.bottomBanner}')`;
+    if (elBottom && theme.bottomBanner) {
+      elBottom.style.backgroundImage = `url('${theme.bottomBanner}')`;
+      if (theme.bannerStyle) Object.assign(elBottom.style, theme.bannerStyle);
+    }
 
     // 红包图
     const elPacket = document.getElementById("bigRedPacket");
@@ -201,14 +228,24 @@
     }
   });
 
-  /* ===== KL timezone helpers ===== */
-  function getKLDate(){ return new Date(new Date().toLocaleString('en-US',{ timeZone:'Asia/Kuala_Lumpur' })); }
-  function isWednesdayKL(){ return getKLDate().getDay() === 3; } // 0 Sun ... 3 Wed
-  function nextWednesdayZero(){
+  /* ===== Company-specific open weekdays =====
+     0=Sun 1=Mon 2=Tue 3=Wed 4=Thu 5=Fri 6=Sat
+     LB7=Wed(3), SGB=Tue(2), RYB=Fri(5)
+  */
+  const COMPANY_OPEN_DAY = { LB7: 3, SGB: 2, RYB: 5 };
+  const WEEKDAY_NAME = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+  function getKLDate(){
+    return new Date(new Date().toLocaleString('en-US',{ timeZone:'Asia/Kuala_Lumpur' }));
+  }
+  function isCompanyOpenToday(companyId){
+    const target = COMPANY_OPEN_DAY[companyId] ?? 3;
+    return getKLDate().getDay() === target;
+  }
+  function nextCompanyOpenZero(companyId){
+    const target = COMPANY_OPEN_DAY[companyId] ?? 3;
     const now = getKLDate();
-    const day = now.getDay();
-    let add = (3 - day + 7) % 7;
-    if (add === 0) add = 7; // if today is Wed, count to next Wed 00:00
+    const add = ((target - now.getDay()) + 7) % 7 || 7; // same day -> next week
     const d = new Date(now);
     d.setDate(now.getDate() + add);
     d.setHours(0,0,0,0);
@@ -222,17 +259,25 @@
     return parts.join(" ");
   }
 
-  /* ===== Notice gating ===== */
+  /* ===== Notice gating (per company) ===== */
   function setupNotice(){
     const overlay = document.getElementById('noticeOverlay');
     const msg = document.getElementById('unlockMsg');
     const btn = document.getElementById('startBtn');
     const packet = document.getElementById('bigRedPacket');
+    const dayEl = document.getElementById('openDayName');
 
     const forced = sessionStorage.getItem('forceUnlock') === '1';
+    const openDayNum = COMPANY_OPEN_DAY[companyId] ?? 3;
+    const openDayName = WEEKDAY_NAME[openDayNum];
 
-    if (isWednesdayKL() || forced) {
-      msg.textContent = forced ? 'Test mode — unlocked via Shift+R' : "It's Wednesday — tap Start to play!";
+    // 更新顶部文案里的星期名
+    if (dayEl) dayEl.textContent = openDayName;
+
+    if (isCompanyOpenToday(companyId) || forced) {
+      msg.textContent = forced
+        ? 'Test mode — unlocked via Shift+R'
+        : `It's ${openDayName} — tap Start to play!`;
       btn.disabled = false;
       btn.onclick = ()=>{
         gameStarted = true;
@@ -244,17 +289,16 @@
       };
     } else {
       btn.disabled = true;
-      const target = nextWednesdayZero();
+      const target = nextCompanyOpenZero(companyId);
       const tick = ()=>{
         const now = getKLDate();
         const ms = target - now;
-        msg.textContent = 'Unlocks on Wednesday. Next open in: ' + formatCountdown(ms);
+        msg.textContent = `Unlocks on ${openDayName}. Next open in: ` + formatCountdown(ms);
       };
       tick();
       setInterval(tick, 1000);
     }
   }
-  document.addEventListener('DOMContentLoaded', setupNotice);
 
   /* ===== Number animation ===== */
   function animateNumber(el, target, duration = 1600, onDone){
@@ -270,6 +314,21 @@
       if (p < 1) requestAnimationFrame(tick); else { el.textContent = fmt.format(target); onDone && onDone(); }
     };
     requestAnimationFrame(tick);
+  }
+
+  /* ===== 音乐淡出并停止 ===== */
+  function fadeOutAndStopAudio(audio, durationMs = 1200) {
+    if (!audio) return;
+    const startVol = audio.volume ?? 1;
+    const start = performance.now();
+    function step(t) {
+      const p = Math.min((t - start) / durationMs, 1);
+      const v = startVol * (1 - p);
+      audio.volume = Math.max(0, v);
+      if (p < 1) requestAnimationFrame(step);
+      else { audio.pause(); audio.currentTime = 0; audio.volume = startVol; }
+    }
+    requestAnimationFrame(step);
   }
 
   /* ===== Open packet ===== */
@@ -304,6 +363,10 @@
       alert('Service busy, try again.');
       return;
     }
+
+    // 背景音乐：开奖后淡出停止
+    const bg = document.getElementById('bgMusic');
+    fadeOutAndStopAudio(bg, 1200);
 
     // === Log to Firestore ===
     try {
@@ -407,12 +470,10 @@
     });
   })();
 
-  // 初始化：DOMReady 后应用主题 & 通知门槛
+  // 初始化
   document.addEventListener('DOMContentLoaded', ()=>{
     applyTheme();
     setupNotice();
-    // 初始化红包与财神的背景图（确保主题已设置好）
-    // （已在 applyTheme 中设置）
   });
 </script>
 </body>
