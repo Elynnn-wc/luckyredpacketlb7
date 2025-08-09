@@ -49,6 +49,10 @@
   .gold-text { background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   #captchaCode { display: none; margin-top: 12px; font-size: 1.2em; letter-spacing: .15em; background: #300040; padding: 6px 12px; border-radius: 6px; font-weight: bold; color: #FFD700; }
   .copy-btn { margin-top: 12px; padding: 10px 20px; background: #28a745; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:1em; }
+
+  /* 🔒 Hidden Test Unlock Button (dev-only; hidden from customers) */
+  #devUnlockBtn{display:none;position:fixed;right:16px;bottom:16px;z-index:10001;padding:10px 14px;border:none;border-radius:999px;background:#111;color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:.92}
+  #devUnlockBtn:active{transform:scale(.96)}
 </style>
 </head>
 <body>
@@ -78,6 +82,9 @@
   <audio id="bgMusic" src="https://github.com/Elynnn-wc/my-music/raw/refs/heads/main/Agent%20Mix%20-%20Qingyi.mp3" preload="none" loop></audio>
   <audio id="openSound" src="https://github.com/Elynnn-wc/my-music/raw/refs/heads/main/cha-ching-7053.mp3" preload="auto"></audio>
 
+  <!-- Hidden dev unlock button -->
+  <button id="devUnlockBtn" type="button" aria-hidden="true" title="Developer Test">Test</button>
+
 <script>
   const WORKER_URL = "https://caishen-draw.elynnn598.workers.dev";
   const COIN_IMG = "https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png";
@@ -85,7 +92,7 @@
   const pageId = "page1";
   let gameStarted = false;
 
-  
+  // Shift+R: 清空并设置测试模式强制解锁
   document.addEventListener("keydown", function(e) {
     if (e.shiftKey && e.key.toLowerCase() === "r") {
       try { sessionStorage.setItem('forceUnlock', '1'); } catch {}
@@ -243,6 +250,39 @@
       navigator.clipboard.writeText(code).then(()=> alert('Verification code copied'));
     }
   }
+
+  // Dev-only hidden unlock control
+  (function(){
+    const btn = document.getElementById('devUnlockBtn');
+    if(!btn) return;
+
+    const isLocal = ['localhost','127.0.0.1','::1'].includes(location.hostname);
+    const DEV_PIN = '741852'; // 🔐 CHANGE THIS to your own PIN
+
+    function reveal(){ btn.style.display='block'; btn.setAttribute('aria-hidden','false'); }
+    if (isLocal) reveal();
+
+    // Secret gesture: 7 taps within 1.5s on #caishen (logo has pointer-events:none)
+    const tapTarget = document.getElementById('caishen') || document.body;
+    let taps = 0, firstTapAt = 0;
+    tapTarget.addEventListener('click', ()=>{
+      const now = performance.now();
+      if (now - firstTapAt > 1500) { taps = 0; firstTapAt = now; }
+      if (taps === 0) firstTapAt = now;
+      taps++;
+      if (taps >= 7) {
+        taps = 0;
+        const input = prompt('Developer PIN');
+        if (input && input === DEV_PIN) reveal();
+      }
+    });
+
+    btn.addEventListener('click', ()=>{
+      try { sessionStorage.setItem('forceUnlock','1'); } catch {}
+      localStorage.clear();
+      location.reload();
+    });
+  })();
 </script>
 </body>
 </html>
