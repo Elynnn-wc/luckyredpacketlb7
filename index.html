@@ -85,7 +85,7 @@
   const pageId = "page1";
   let gameStarted = false;
 
-  // Shift+R: 清空并设置测试模式强制解锁
+  
   document.addEventListener("keydown", function(e) {
     if (e.shiftKey && e.key.toLowerCase() === "r") {
       try { sessionStorage.setItem('forceUnlock', '1'); } catch {}
