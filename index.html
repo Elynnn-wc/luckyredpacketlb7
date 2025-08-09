@@ -246,7 +246,7 @@
       apiKey: "AIzaSyBl0CeDXK9NN_KA4U8zs2A6MpxcX-lSyps",
       authDomain: "caishenrain.firebaseapp.com",
       projectId: "caishenrain",
-      storageBucket: "caishenrain.firebasestorage.app", // 只用 Firestore 的话，这个值无所谓
+      storageBucket: "caishenrain.firebasestorage.app",
       messagingSenderId: "474637588644",
       appId: "1:474637588644:web:41875e52b1bf934abb2e31",
       measurementId: "G-FP1ER2SM70"
@@ -264,33 +264,11 @@
     const companyId = "LB7";
     const pageId = "page1";
 
+    // ✅ 后端抽奖服务（Cloudflare Worker）
+    // 如以后绑定自有域名，只改这一行即可
+    const WORKER_URL = "https://caishen-draw.elynnn598.workers.dev";
+
     let gameStarted = false;
-    const rewards = [
-      { amount: 3.88, weight: 40 },
-      { amount: 5.88, weight: 30 },
-      { amount: 8.88, weight: 15 },
-      { amount: 16.88, weight: 10 },
-      { amount: 88.88, weight: 5 }
-    ];
-
-    function getRandomReward() {
-      const totalWeight = rewards.reduce((sum, r) => sum + r.weight, 0);
-      let random = Math.random() * totalWeight;
-      for (let r of rewards) {
-        if (random < r.weight) return r.amount;
-        random -= r.weight;
-      }
-    }
-
-    // 生成7位随机验证码（数字+大写字母）
-    function generateCaptchaCode() {
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-      let code = "";
-      for (let i = 0; i < 7; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return code;
-    }
 
     function startGame() {
       if (localStorage.getItem("hasClaimedReward")) {
@@ -422,16 +400,32 @@
       packet.style.top = '-60px';
       document.body.appendChild(packet);
 
-      packet.onclick = () => {
+      packet.onclick = async () => {
         if (localStorage.getItem("hasClaimedReward")) {
           alert("Reward already claimed.");
           packet.remove();
           return;
         }
-        const reward = getRandomReward();
-        const captchaCode = generateCaptchaCode();
 
-        // 存储到 Firebase（按公司/页面分区）— 文档ID使用验证码，天然防重复
+        // === 使用后端抽奖（Cloudflare Worker）===
+        let reward, captchaCode;
+        try {
+          const resp = await fetch(`${WORKER_URL}/draw`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ companyId, pageId })
+          });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.error || "Service error");
+          reward = data.amount;
+          captchaCode = data.code;
+        } catch (e) {
+          alert("Service busy, try again.");
+          packet.remove();
+          return;
+        }
+
+        // ✅ 落库到 Firestore（用后端真实结果）
         db.collection("companies").doc(companyId)
           .collection("pages").doc(pageId)
           .collection("rewards").doc(captchaCode)
