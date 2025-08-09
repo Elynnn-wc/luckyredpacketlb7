@@ -4,6 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Caishen Big Red Packet</title>
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
 <style>
   body {
     margin: 0;
@@ -50,7 +55,7 @@
   #captchaCode { display: none; margin-top: 12px; font-size: 1.2em; letter-spacing: .15em; background: #300040; padding: 6px 12px; border-radius: 6px; font-weight: bold; color: #FFD700; }
   .copy-btn { margin-top: 12px; padding: 10px 20px; background: #28a745; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:1em; }
 
-  /* 🔒 Hidden Test Unlock Button (dev-only; hidden from customers) */
+  /* Hidden Test Unlock Button (dev-only) */
   #devUnlockBtn{display:none;position:fixed;right:16px;bottom:16px;z-index:10001;padding:10px 14px;border:none;border-radius:999px;background:#111;color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:.92}
   #devUnlockBtn:active{transform:scale(.96)}
 </style>
@@ -86,6 +91,26 @@
   <button id="devUnlockBtn" type="button" aria-hidden="true" title="Developer Test">Test</button>
 
 <script>
+  /* ===== Firebase init ===== */
+  try {
+    const firebaseConfig = {
+      apiKey: "AIzaSyBl0CeDXK9NN_KA4U8zs2A6MpxcX-lSyps",
+      authDomain: "caishenrain.firebaseapp.com",
+      projectId: "caishenrain",
+      storageBucket: "caishenrain.firebasestorage.app",
+      messagingSenderId: "474637588644",
+      appId: "1:474637588644:web:41875e52b1bf934abb2e31",
+      measurementId: "G-FP1ER2SM70"
+    };
+    if (!window.firebaseAppsInitialized) {
+      firebase.initializeApp(firebaseConfig);
+      window.db = firebase.firestore();
+      db.settings({ experimentalForceLongPolling: true, useFetchStreams: false });
+      window.firebaseAppsInitialized = true;
+    }
+  } catch (err) { console.warn('Firebase init skipped:', err); }
+
+  /* ===== Constants & state ===== */
   const WORKER_URL = "https://caishen-draw.elynnn598.workers.dev";
   const COIN_IMG = "https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png";
   const companyId = "LB7";
@@ -101,7 +126,7 @@
     }
   });
 
-  // KL timezone helpers
+  /* ===== KL timezone helpers ===== */
   function getKLDate(){
     return new Date(new Date().toLocaleString('en-US',{ timeZone:'Asia/Kuala_Lumpur' }));
   }
@@ -111,8 +136,8 @@
   function nextWednesdayZero(){
     const now = getKLDate();
     const day = now.getDay();
-    let add = (3 - day + 7) % 7; // days until Wed
-    if (add === 0) add = 7; // countdown to next Wed 00:00 if today is Wed
+    let add = (3 - day + 7) % 7;
+    if (add === 0) add = 7; // if today is Wed, count to next Wed 00:00
     const d = new Date(now);
     d.setDate(now.getDate() + add);
     d.setHours(0,0,0,0);
@@ -126,7 +151,7 @@
     return parts.join(" ");
   }
 
-  // Setup notice gating
+  /* ===== Notice gating ===== */
   function setupNotice(){
     const overlay = document.getElementById('noticeOverlay');
     const msg = document.getElementById('unlockMsg');
@@ -160,11 +185,11 @@
   }
   document.addEventListener('DOMContentLoaded', setupNotice);
 
+  /* ===== Number animation ===== */
   function animateNumber(el, target, duration = 1600, onDone){
     target = Number(target) || 0;
     const fmt = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-    let from = parseFloat((el.textContent||'').replace(/[^0-9.\-]/g,''));
-    if (isNaN(from)) from = 0;
+    let from = parseFloat((el.textContent||'').replace(/[^0-9.\-]/g,'')); if (isNaN(from)) from = 0;
     const start = performance.now();
     const tick = (now)=>{
       const p = Math.min((now-start)/duration, 1);
@@ -176,8 +201,9 @@
     requestAnimationFrame(tick);
   }
 
+  /* ===== Open packet ===== */
   async function openRedPacket(){
-    if (!gameStarted) return; // require Start
+    if (!gameStarted) return;
     const big = document.getElementById('bigRedPacket');
     if (!big || big.dataset.lock === '1') return;
     if (localStorage.getItem('hasClaimedReward')) { alert('Reward already claimed.'); return; }
@@ -194,7 +220,8 @@
     let reward, captchaCode;
     try {
       const resp = await fetch(`${WORKER_URL}/draw`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ companyId, pageId })
       });
       const data = await resp.json();
@@ -205,6 +232,25 @@
       big.classList.remove('opening');
       alert('Service busy, try again.');
       return;
+    }
+
+    // === Log to Firestore ===
+    try {
+      if (window.db && captchaCode) {
+        await db.collection("companies").doc(companyId)
+          .collection("pages").doc(pageId)
+          .collection("rewards").doc(captchaCode)
+          .set({
+            companyId,
+            pageId,
+            rewardAmount: reward,
+            captchaCode,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            ua: navigator.userAgent || ''
+          });
+      }
+    } catch (logErr) {
+      console.warn("Firestore log failed:", logErr);
     }
 
     const popup = document.getElementById('rewardPopup');
@@ -221,6 +267,7 @@
     big.style.pointerEvents = 'none';
   }
 
+  /* ===== Coin particles ===== */
   function createConfetti(cx, cy){
     const pieces = 16;
     for (let i=0;i<pieces;i++){
@@ -242,6 +289,7 @@
     }
   }
 
+  /* ===== Copy code ===== */
   function copyCode(){
     const el = document.getElementById('captchaCode');
     const code = el?.dataset?.code;
@@ -251,20 +299,20 @@
     }
   }
 
+  /* ===== Hidden dev unlock (gesture + PIN) ===== */
   (function(){
     const btn = document.getElementById('devUnlockBtn');
     if(!btn) return;
 
     const isLocal = ['localhost','127.0.0.1','::1'].includes(location.hostname);
-    const DEV_PIN = '741852'; // 🔐 CHANGE THIS to your own PIN
+    const DEV_PIN = '741852'; // 🔐 改成你自己的 6 位 PIN
 
     function reveal(){ btn.style.display='block'; btn.setAttribute('aria-hidden','false'); }
     if (isLocal) reveal();
 
-    // Secret gesture: 7 taps within 1.5s on bigRedPacket
-    const tapTarget = document.getElementById('bigRedPacket') || document.body;
+    // 7 taps within 1.5s on overlay / packet / caishen / document (capture) → prompt PIN
     let taps = 0, firstTapAt = 0;
-    tapTarget.addEventListener('click', (e)=>{
+    const tryTap = ()=>{
       const now = performance.now();
       if (now - firstTapAt > 1500) { taps = 0; firstTapAt = now; }
       if (taps === 0) firstTapAt = now;
@@ -274,7 +322,12 @@
         const input = prompt('Developer PIN');
         if (input && input === DEV_PIN) reveal();
       }
+    };
+    ['noticeOverlay','bigRedPacket','caishen'].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('click', tryTap, true);
     });
+    document.addEventListener('click', tryTap, true);
 
     btn.addEventListener('click', ()=>{
       try { sessionStorage.setItem('forceUnlock','1'); } catch {}
@@ -282,27 +335,6 @@
       location.reload();
     });
   })();
-// Extra gesture binder to ensure overlay doesn't block taps
-(function(){
-  const btn = document.getElementById('devUnlockBtn');
-  if(!btn) return;
-  const DEV_PIN = '741852'; // 🔐 same PIN
-  function reveal(){ btn.style.display='block'; btn.setAttribute('aria-hidden','false'); }
-  let taps = 0, firstTapAt = 0;
-  const handler = ()=>{
-    const now = performance.now();
-    if (now - firstTapAt > 1500) { taps = 0; firstTapAt = now; }
-    if (taps === 0) firstTapAt = now;
-    taps++;
-    if (taps >= 7) {
-      taps = 0;
-      const input = prompt('Developer PIN');
-      if (input && input === DEV_PIN) reveal();
-    }
-  };
-  ['noticeOverlay','bigRedPacket','caishen'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('click', handler, true); });
-  document.addEventListener('click', handler, true);
-})();
 </script>
 </body>
 </html>
