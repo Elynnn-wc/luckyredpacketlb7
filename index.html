@@ -1,528 +1,248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Caishen Bonus Rain</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: url('https://img.freepik.com/free-vector/watercolor-sugar-cotton-clouds-background_79603-2380.jpg?semt=ais_hybrid&w=740') no-repeat center center;
-      background-size: cover;
-      font-family: sans-serif;
-      height: 100vh;
-      width: 100vw;
-    }
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: radial-gradient(white 1px, transparent 1px);
-      background-size: 40px 40px;
-      opacity: 0.12;
-      z-index: 0;
-      pointer-events: none;
-    }
-    #noticeOverlay {
-      position: fixed;
-      z-index: 10000;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.88);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      flex-direction: column;
-    }
-    #noticeBox {
-      background: #4b1c9c;
-      padding: 30px 50px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255,255,255,0.2);
-      text-align: center;
-    }
-    #noticeBox h2 { margin: 0 0 12px; }
-    #noticeBox button {
-      margin-top: 20px;
-      padding: 10px 24px;
-      font-size: 1.1em;
-      background: #6e3ad8;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      cursor: pointer;
-    }
-    #caishen {
-      position: absolute;
-      top: 10%;
-      left: 0;
-      width: 240px;
-      height: 300px;
-      background: url('https://i.postimg.cc/qBDyW26y/00243643-2.png') no-repeat center center;
-      background-size: contain;
-      animation: moveLeftRight 6s ease-in-out infinite alternate;
-      z-index: 10;
-    }
-    @keyframes moveLeftRight {
-      from { left: 0; }
-      to { left: calc(100% - 120px); }
-    }
-    .red-packet {
-      position: absolute;
-      width: 80px;
-      height: 90px;
-      background: url('https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png') no-repeat center center;
-      background-size: contain;
-      cursor: pointer;
-      z-index: 5;
-    }
-    #rewardPopup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(20, 0, 40, 0.95);
-      padding: 20px 30px 50px 30px;
-      border-radius: 10px;
-      display: none;
-      font-size: 1.5em;
-      z-index: 9999;
-      text-align: center;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-      color: white;
-    }
-    #rewardPopup a {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 10px 20px;
-      background: #6e3ad8;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      z-index: 10001;
-      position: relative;
-    }
-    #rewardPopup .close-btn {
-      position: absolute;
-      top: 8px;
-      right: 10px;
-      color: #ff4444;
-      font-size: 1.5em;
-      cursor: pointer;
-      font-weight: bold;
-      z-index: 10002;
-      user-select: none;
-    }
-    @keyframes bounceScale {
-      0% { transform: scale(1); }
-      30% { transform: scale(1.5); }
-      60% { transform: scale(0.9); }
-      100% { transform: scale(1); }
-    }
-    .bounce {
-      display: inline-block;
-      animation: bounceScale 0.6s ease;
-    }
-    .gold-text {
-      background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8),
-                   0 0 20px rgba(255, 165, 0, 0.6),
-                   0 0 30px rgba(255, 215, 0, 0.9);
-      font-weight: bold;
-    }
-    /* 默认先隐藏验证码（动画结束再显示） */
-    #captchaCode {
-      display: none;
-      margin-top: 12px;
-      font-size: 1.2em;
-      letter-spacing: 0.15em;
-      user-select: all;
-      background: #300040;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-weight: bold;
-      color: #FFD700;
-      text-shadow: 0 0 5px #FFA500;
-    }
-    #bottomBanner {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 150px;
-      background: url('https://img.capalangresource.com/images/public/cpwl/slideshow/WLLB7/GENERAL/slideshow_20250426022829742.gif') no-repeat center center;
-      background-size: cover;
-      z-index: 15;
-    }
-    #companyLogo {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(1);
-      max-width: 100vw;
-      max-height: 100vh;
-      opacity: 0.85;
-      pointer-events: none;
-      z-index: 1;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Caishen Big Red Packet</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: url('https://img.freepik.com/free-vector/watercolor-sugar-cotton-clouds-background_79603-2380.jpg') center/cover no-repeat;
+    font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  /* Play Notice */
+  #noticeOverlay {
+    position: fixed; inset: 0; z-index: 10000;
+    background: rgba(0,0,0,.88); color:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding: 24px;
+  }
+  #noticeBox { background:#4b1c9c; max-width: 560px; width: min(92vw,560px); padding: 28px 24px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  #noticeBox h2 { margin: 0 0 10px; }
+  #noticeBox p { margin: 6px 0; }
+  #noticeBox .small { opacity:.9; font-size:.92em; }
+  #noticeBox button { margin-top: 14px; padding: 10px 18px; border:0; border-radius:10px; background:#d32f2f; color:#fff; font-weight:600; cursor:pointer; }
+  #startBtn[disabled] { opacity:.6; cursor:not-allowed; }
 
-    /* === NEW: 复制按钮 & 提示 === */
-    #rewardPopup .copy-btn {
-      margin-top: 12px;
-      padding: 10px 20px;
-      background: #28a745;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1em;
-      z-index: 10001;
-      position: relative;
-    }
-    #toast {
-      position: fixed;
-      left: 50%;
-      bottom: 24px;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.85);
-      color: #fff;
-      padding: 10px 16px;
-      border-radius: 6px;
-      font-size: .95em;
-      display: none;
-      z-index: 10000;
-    }
-  </style>
+  #companyLogo { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1); max-width: 100vw; max-height: 100vh; opacity: .85; pointer-events: none; z-index: 1; }
+
+  #caishen { position: absolute; top: 10%; left: 0; width: 240px; height: 300px; background: url('https://i.postimg.cc/qBDyW26y/00243643-2.png') center/contain no-repeat; animation: moveLeftRight 6s ease-in-out infinite alternate; z-index: 10; }
+  @keyframes moveLeftRight { from { transform: translateX(0); } to { transform: translateX(calc(100vw - 120px)); } }
+
+  #bottomBanner { position: fixed; bottom: 0; left: 0; width: 100%; height: 150px; background: url('https://img.capalangresource.com/images/public/cpwl/slideshow/WLLB7/GENERAL/slideshow_20250426022829742.gif') center/cover no-repeat; z-index: 15; pointer-events:none; }
+
+  #bigRedPacket { position: relative; width: 200px; height: 260px; background: url('https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png') center/contain no-repeat; cursor: pointer; animation: pulse 2s infinite; z-index: 20; }
+  #bigRedPacket.disabled { filter: grayscale(1) opacity(.6); pointer-events:none; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  #bigRedPacket.opening { animation: openPop 700ms ease-out forwards; }
+  @keyframes openPop { 0%{transform:scale(1) rotate(0)} 40%{transform:scale(1.15) rotate(-4deg)} 65%{transform:scale(.98) rotate(2deg)} 100%{transform:scale(1) rotate(0)} }
+
+  .coin { position: fixed; width: 28px; height: 28px; left: var(--x,50%); top: var(--y,50%); transform: translate(-50%,-50%) rotate(var(--r,0deg)); opacity:0; pointer-events:none; will-change: transform, opacity; z-index: 2000; background-image: var(--img); background-position:center; background-repeat:no-repeat; background-size:contain; animation: coin-burst 900ms ease-out forwards; }
+  @keyframes coin-burst { 0%{opacity:1;transform:translate(-50%,-50%) scale(.6) rotate(var(--r))} 100%{opacity:0;transform:translate(calc(-50% + var(--dx,0px)),calc(-50% + var(--dy,0px))) scale(1.1) rotate(calc(var(--r) + 360deg))} }
+
+  #rewardPopup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,0,40,.95); padding: 20px 30px 50px; border-radius: 12px; display: none; font-size: 1.5em; z-index: 9999; text-align: center; color: #fff; }
+  .gold-text { background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  #captchaCode { display: none; margin-top: 12px; font-size: 1.2em; letter-spacing: .15em; background: #300040; padding: 6px 12px; border-radius: 6px; font-weight: bold; color: #FFD700; }
+  .copy-btn { margin-top: 12px; padding: 10px 20px; background: #28a745; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:1em; }
+</style>
 </head>
 <body>
-  <audio id="bgMusic" src="https://github.com/Elynnn-wc/my-music/raw/refs/heads/main/M500004LgwgG2HSyhE.mp3" loop></audio>
-
   <div id="noticeOverlay">
     <div id="noticeBox">
-      <h2>🧧 Welcome to Caishen Bonus Rain!</h2>
-      <p>Click on the red packets to claim your reward.<br/>
-        Maximum reward: <strong>SGD $20</strong><br/>
-        🎉 First-time users get <strong>SGD $10</strong> instantly!<br/>
-        👥 Invite 3 friends to get another <strong>SGD $10</strong> bonus.<br/>
-        <small>*T&C apply.</small>
-      </p>
-      <p style="color: #ff4444; font-weight: bold;">🚨 You can only claim the reward once per user.</p>
-      <button onclick="startGame()">Start</button>
+      <h2>🧧 Play Guidelines</h2>
+      <p>Random Angpao every <strong>Wednesday</strong> from <strong>SGD $3.88</strong> to <strong>SGD $88.88</strong>.</p>
+      <p class="small">Available once per user.</p>
+      <p id="unlockMsg" class="small" style="margin-top:8px"></p>
+      <button id="startBtn" disabled>Start</button>
     </div>
   </div>
 
-  <div id="caishen"></div>
+  <img id="companyLogo" src="https://img.capalangresource.com/images/public/cpwl/banner/WLLB7/GENERAL/banner_20250426050341681.webp" alt="Company Logo"/>
+  <div id="caishen" aria-hidden="true"></div>
+  <div id="bigRedPacket" class="disabled" onclick="openRedPacket()" aria-label="Open lucky packet"></div>
 
-  <div id="rewardPopup">
-    <div class="close-btn" onclick="closeReward()">×</div>
-    🎉 You got SGD
-    <span class="gold-text">$</span>
-    <span id="rewardNumber" class="gold-text bounce">0.00</span>
-    Bonus!<br/>
-    <div id="captchaCode"></div>
+  <div id="rewardPopup" role="dialog" aria-modal="true" aria-labelledby="rewardNumber">
+    🎉 You got SGD <span class="gold-text">$</span> <span id="rewardNumber" class="gold-text">0.00</span> Bonus!<br/>
+    <div id="captchaCode" aria-live="polite"></div>
     <p style="color: #ff4444; font-weight: bold;">🚨 Please Screenshot and send to admin.</p>
-
-    <!-- 复制验证码按钮 + 提示层 -->
     <button class="copy-btn" onclick="copyCode()">Copy Verification Code</button>
-    <div id="toast">Copied!</div>
   </div>
 
-  <img id="companyLogo" src="https://img.capalangresource.com/images/public/cpwl/banner/WLLB7/GENERAL/banner_20250426050341681.webp">
+  <div id="bottomBanner" aria-hidden="true"></div>
 
-  <div id="bottomBanner"></div>
+  <audio id="bgMusic" src="https://github.com/Elynnn-wc/my-music/raw/refs/heads/main/Agent%20Mix%20-%20Qingyi.mp3" preload="none" loop></audio>
+  <audio id="openSound" src="https://github.com/Elynnn-wc/my-music/raw/refs/heads/main/cha-ching-7053.mp3" preload="auto"></audio>
 
-  <!-- Firebase SDK (compat 版，适合直接在 HTML 里用) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <!-- 如需开启 App Check（可选，建议上线前启用） -->
-  <!-- <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-check-compat.js"></script> -->
+<script>
+  const WORKER_URL = "https://caishen-draw.elynnn598.workers.dev";
+  const COIN_IMG = "https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png";
+  const companyId = "LB7";
+  const pageId = "page1";
+  let gameStarted = false;
 
-  <script>
-    // ====== Firebase 初始化（已接入你的项目配置）======
-    const firebaseConfig = {
-      apiKey: "AIzaSyBl0CeDXK9NN_KA4U8zs2A6MpxcX-lSyps",
-      authDomain: "caishenrain.firebaseapp.com",
-      projectId: "caishenrain",
-      storageBucket: "caishenrain.firebasestorage.app",
-      messagingSenderId: "474637588644",
-      appId: "1:474637588644:web:41875e52b1bf934abb2e31",
-      measurementId: "G-FP1ER2SM70"
+  // Shift+R: 清空并设置测试模式强制解锁
+  document.addEventListener("keydown", function(e) {
+    if (e.shiftKey && e.key.toLowerCase() === "r") {
+      try { sessionStorage.setItem('forceUnlock', '1'); } catch {}
+      localStorage.clear();
+      location.reload();
+    }
+  });
+
+  // KL timezone helpers
+  function getKLDate(){
+    return new Date(new Date().toLocaleString('en-US',{ timeZone:'Asia/Kuala_Lumpur' }));
+  }
+  function isWednesdayKL(){
+    return getKLDate().getDay() === 3; // 0 Sun ... 3 Wed
+  }
+  function nextWednesdayZero(){
+    const now = getKLDate();
+    const day = now.getDay();
+    let add = (3 - day + 7) % 7; // days until Wed
+    if (add === 0) add = 7; // countdown to next Wed 00:00 if today is Wed
+    const d = new Date(now);
+    d.setDate(now.getDate() + add);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  function formatCountdown(ms){
+    const s = Math.max(0, Math.floor(ms/1000));
+    const d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60), sec = s%60;
+    const parts = [];
+    if(d) parts.push(d+"d"); if(h||parts.length) parts.push(h+"h"); if(m||parts.length) parts.push(m+"m"); parts.push(sec+"s");
+    return parts.join(" ");
+  }
+
+  // Setup notice gating
+  function setupNotice(){
+    const overlay = document.getElementById('noticeOverlay');
+    const msg = document.getElementById('unlockMsg');
+    const btn = document.getElementById('startBtn');
+    const packet = document.getElementById('bigRedPacket');
+
+    const forced = sessionStorage.getItem('forceUnlock') === '1';
+
+    if (isWednesdayKL() || forced) {
+      msg.textContent = forced ? 'Test mode — unlocked via Shift+R' : "It's Wednesday — tap Start to play!";
+      btn.disabled = false;
+      btn.onclick = ()=>{
+        gameStarted = true;
+        overlay.style.display = 'none';
+        packet.classList.remove('disabled');
+        const bg = document.getElementById('bgMusic');
+        if(bg){ bg.volume = 0.5; bg.play().catch(()=>{}); }
+        try { sessionStorage.removeItem('forceUnlock'); } catch {}
+      };
+    } else {
+      btn.disabled = true;
+      const target = nextWednesdayZero();
+      const tick = ()=>{
+        const now = getKLDate();
+        const ms = target - now;
+        msg.textContent = 'Unlocks on Wednesday. Next open in: ' + formatCountdown(ms);
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', setupNotice);
+
+  function animateNumber(el, target, duration = 1600, onDone){
+    target = Number(target) || 0;
+    const fmt = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    let from = parseFloat((el.textContent||'').replace(/[^0-9.\-]/g,''));
+    if (isNaN(from)) from = 0;
+    const start = performance.now();
+    const tick = (now)=>{
+      const p = Math.min((now-start)/duration, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      const val = from + (target - from)*e;
+      el.textContent = fmt.format(val);
+      if (p < 1) requestAnimationFrame(tick); else { el.textContent = fmt.format(target); onDone && onDone(); }
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    requestAnimationFrame(tick);
+  }
 
-    // ✅ 长轮询设置（规避某些网络下的 400）
-    db.settings({
-      experimentalForceLongPolling: true,
-      useFetchStreams: false
+  async function openRedPacket(){
+    if (!gameStarted) return; // require Start
+    const big = document.getElementById('bigRedPacket');
+    if (!big || big.dataset.lock === '1') return;
+    if (localStorage.getItem('hasClaimedReward')) { alert('Reward already claimed.'); return; }
+
+    big.dataset.lock = '1';
+    big.classList.add('opening');
+
+    const openSnd = document.getElementById('openSound');
+    if(openSnd){ openSnd.currentTime = 0; openSnd.play().catch(()=>{}); }
+
+    const rect = big.getBoundingClientRect();
+    createConfetti(rect.left + rect.width/2, rect.top + rect.height*0.35);
+
+    let reward, captchaCode;
+    try {
+      const resp = await fetch(`${WORKER_URL}/draw`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId, pageId })
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Service error');
+      reward = data.amount; captchaCode = data.code;
+    } catch (e) {
+      big.dataset.lock = '0';
+      big.classList.remove('opening');
+      alert('Service busy, try again.');
+      return;
+    }
+
+    const popup = document.getElementById('rewardPopup');
+    const numberEl = document.getElementById('rewardNumber');
+    const captchaEl = document.getElementById('captchaCode');
+    popup.style.display = 'block';
+    captchaEl.style.display = 'none';
+    animateNumber(numberEl, Number(reward), 1600, ()=>{
+      captchaEl.textContent = `Verification Code: ${captchaCode}`;
+      captchaEl.dataset.code = captchaCode;
+      captchaEl.style.display = 'block';
     });
+    localStorage.setItem('hasClaimedReward', '1');
+    big.style.pointerEvents = 'none';
+  }
 
-    // 🔧 本页面所属的公司 & 页面
-    const companyId = "LB7";
-    const pageId = "page1";
-
-    // ✅ 后端抽奖服务（Cloudflare Worker）
-    // 如以后绑定自有域名，只改这一行即可
-    const WORKER_URL = "https://caishen-draw.elynnn598.workers.dev";
-
-    let gameStarted = false;
-
-    function startGame() {
-      if (localStorage.getItem("hasClaimedReward")) {
-        alert("You have already claimed your reward.");
-        return;
-      }
-      document.getElementById('noticeOverlay').style.display = 'none';
-      gameStarted = true;
-      setInterval(createRedPacket, 300);
-      const bgMusic = document.getElementById('bgMusic');
-      if (bgMusic) {
-        bgMusic.volume = 0.5;
-        bgMusic.play().catch(() => console.warn("Music couldn't autoplay."));
-      }
+  function createConfetti(cx, cy){
+    const pieces = 16;
+    for (let i=0;i<pieces;i++){
+      const el = document.createElement('div');
+      el.className = 'coin';
+      const angle = (Math.PI*2) * (i/pieces) + (Math.random()*0.8-0.4);
+      const distance = 100 + Math.random()*90;
+      const dx = Math.cos(angle)*distance;
+      const dy = Math.sin(angle)*distance;
+      const r = Math.floor(Math.random()*360) + 'deg';
+      el.style.setProperty('--img', `url(${COIN_IMG})`);
+      el.style.setProperty('--x', cx + 'px');
+      el.style.setProperty('--y', cy + 'px');
+      el.style.setProperty('--dx', dx + 'px');
+      el.style.setProperty('--dy', dy + 'px');
+      el.style.setProperty('--r', r);
+      document.body.appendChild(el);
+      el.addEventListener('animationend', ()=> el.remove());
     }
+  }
 
-    function stopMusic() {
-      const bgMusic = document.getElementById('bgMusic');
-      if (bgMusic) {
-        bgMusic.pause();
-        bgMusic.currentTime = 0;
-      }
+  function copyCode(){
+    const el = document.getElementById('captchaCode');
+    const code = el?.dataset?.code;
+    if (!code) return;
+    if (navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(code).then(()=> alert('Verification code copied'));
     }
-
-    /* === SLOT式先快后慢 + 轻微超冲回落；动画结束触发 onComplete === */
-    function animateNumber(el, target, duration = 2400, onComplete) {
-      duration = Math.max(duration, 1800);
-      target = Number(target) || 0;
-
-      const currentText = (el.textContent || "").replace(/[^0-9.\-]/g, "");
-      let startVal = parseFloat(currentText);
-      if (isNaN(startVal)) startVal = 0;
-
-      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        el.textContent = new Intl.NumberFormat("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}).format(target);
-        if (typeof onComplete === "function") onComplete();
-        return;
-      }
-
-      if (el.__raf) cancelAnimationFrame(el.__raf);
-      if (el.__slotTimer) clearTimeout(el.__slotTimer);
-
-      // 触发原有 bounce 动效
-      el.classList.remove("bounce");
-      void el.offsetWidth;
-      el.classList.add("bounce");
-
-      const fmt = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const startTime = performance.now();
-      const endTime   = startTime + duration;
-      const finalPhaseMs = Math.min(700, duration * 0.35);
-      let interval = 18;
-      const slowFactor = 1.08;
-      const maxInterval = 150;
-
-      function noisyValue(progress) {
-        const spread = 0.15 + (1 - progress) * 0.85;
-        const min = Math.min(startVal, target) * (1 - spread);
-        const max = Math.max(startVal, target) * (1 + spread) + 0.01;
-        return Math.random() * (max - min) + min;
-      }
-
-      const tickLoop = () => {
-        const now = performance.now();
-        const remaining = endTime - now;
-        if (remaining <= finalPhaseMs) {
-          return smoothFinish();
-        }
-        const elapsed = now - startTime;
-        const progress = Math.min(elapsed / (duration - finalPhaseMs), 1);
-        el.textContent = fmt.format(noisyValue(progress));
-        interval = Math.min(interval * slowFactor, maxInterval);
-        el.__slotTimer = setTimeout(tickLoop, interval);
-      };
-
-      function smoothFinish() {
-        const currentText = (el.textContent || "").replace(/[^0-9.\-]/g, "");
-        let from = parseFloat(currentText);
-        if (isNaN(from)) from = startVal;
-
-        const start = performance.now();
-        const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
-
-        const step = (now) => {
-          const p = Math.min((now - start) / finalPhaseMs, 1);
-          const eased = easeOutCubic(p);
-          const val = from + (target - from) * eased;
-          el.textContent = fmt.format(val);
-
-          if (p < 1) {
-            el.__raf = requestAnimationFrame(step);
-          } else {
-            // === Overshoot: 超一点点(约1.5%)再回落到目标 ===
-            const overshootTarget = target * 1.015;
-            const overshootStart = performance.now();
-            const overshootDuration = 180; // 150–200ms 均可
-            const easeOutBack = t => 1 - Math.pow(1 - t, 2.5);
-
-            const overshootStep = (now2) => {
-              const p2 = Math.min((now2 - overshootStart) / overshootDuration, 1);
-              const eased2 = easeOutBack(p2);
-              const val2 = overshootTarget + (target - overshootTarget) * eased2;
-              el.textContent = fmt.format(val2);
-
-              if (p2 < 1) {
-                el.__raf = requestAnimationFrame(overshootStep);
-              } else {
-                el.textContent = fmt.format(target); // 对齐最终值
-                el.__raf = null;
-                if (typeof onComplete === "function") onComplete();
-              }
-            };
-            requestAnimationFrame(overshootStep);
-          }
-        };
-
-        el.__raf = requestAnimationFrame(step);
-      }
-
-      // 启动跳数阶段
-      tickLoop();
-    }
-
-    function createRedPacket() {
-      if (!gameStarted) return;
-      const packet = document.createElement('div');
-      packet.className = 'red-packet';
-      packet.style.left = Math.random() * (window.innerWidth - 50) + 'px';
-      packet.style.top = '-60px';
-      document.body.appendChild(packet);
-
-      packet.onclick = async () => {
-        if (localStorage.getItem("hasClaimedReward")) {
-          alert("Reward already claimed.");
-          packet.remove();
-          return;
-        }
-
-        // === 使用后端抽奖（Cloudflare Worker）===
-        let reward, captchaCode;
-        try {
-          const resp = await fetch(`${WORKER_URL}/draw`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ companyId, pageId })
-          });
-          const data = await resp.json();
-          if (!resp.ok) throw new Error(data.error || "Service error");
-          reward = data.amount;
-          captchaCode = data.code;
-        } catch (e) {
-          alert("Service busy, try again.");
-          packet.remove();
-          return;
-        }
-
-        // ✅ 落库到 Firestore（用后端真实结果）
-        db.collection("companies").doc(companyId)
-          .collection("pages").doc(pageId)
-          .collection("rewards").doc(captchaCode)
-          .set({
-            companyId,
-            pageId,
-            rewardAmount: reward,
-            captchaCode: captchaCode,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          }).then(() => {
-            console.log("Reward saved:", companyId, pageId, captchaCode);
-          }).catch((error) => {
-            console.error("Error saving reward:", error);
-          });
-
-        // 弹窗 + 数字动画；验证码等动画完成后才显示
-        document.getElementById('rewardPopup').style.display = 'block';
-        const numberEl = document.getElementById('rewardNumber');
-        const captchaEl = document.getElementById('captchaCode');
-
-        captchaEl.style.display = "none"; // 先隐藏
-        animateNumber(numberEl, reward, 2400, () => {
-          // 动画结束时才显示验证码
-          captchaEl.textContent = `Verification Code: ${captchaCode}`;
-          captchaEl.dataset.code = captchaCode; // 供复制用（纯验证码）
-          captchaEl.style.display = "inline-block";
-        });
-
-        localStorage.setItem("hasClaimedReward", "1");
-        packet.remove();
-      };
-
-      let top = -60;
-      const fall = setInterval(() => {
-        top += 4;
-        packet.style.top = top + 'px';
-        if (top > window.innerHeight) {
-          clearInterval(fall);
-          packet.remove();
-        }
-      }, 20);
-    }
-
-    function closeReward() {
-      document.getElementById('rewardPopup').style.display = 'none';
-    }
-
-    // 一键秒重置 Shift+R
-    document.addEventListener("keydown", function(e) {
-      if (e.shiftKey && e.key.toLowerCase() === "r") {
-        localStorage.clear();
-        location.reload();
-      }
-    });
-
-    // === 复制验证码功能 ===
-    function copyCode() {
-      const el = document.getElementById('captchaCode');
-      const code = el?.dataset?.code || '';
-      if (!code) {
-        showToast('No code yet.');
-        return;
-      }
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(code)
-          .then(() => showToast('Verification code copied'))
-          .catch(() => fallbackCopy(code));
-      } else {
-        fallbackCopy(code);
-      }
-    }
-
-    function fallbackCopy(text) {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand('copy');
-        showToast('Verification code copied');
-      } catch (e) {
-        showToast('Copy failed, long-press to select');
-      }
-      document.body.removeChild(ta);
-    }
-
-    function showToast(msg) {
-      const t = document.getElementById('toast');
-      if (!t) return;
-      t.textContent = msg || 'Copied!';
-      t.style.display = 'block';
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => (t.style.display = 'none'), 1500);
-    }
-  </script>
+  }
+</script>
 </body>
 </html>
