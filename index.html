@@ -5,16 +5,252 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Caishen Big Red Packet</title>
 <style>
-  /* ... 原样保留现有样式 ... */
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: url('https://img.freepik.com/free-vector/watercolor-sugar-cotton-clouds-background_79603-2380.jpg') center/cover no-repeat;
+    font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  /* Play Notice */
+  #noticeOverlay {
+    position: fixed; inset: 0; z-index: 10000;
+    background: rgba(0,0,0,.88); color:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding: 24px;
+  }
+  #noticeBox { background:#4b1c9c; max-width: 560px; width: min(92vw,560px); padding: 28px 24px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  #noticeBox h2 { margin: 0 0 10px; }
+  #noticeBox p { margin: 6px 0; }
+  #noticeBox .small { opacity:.9; font-size:.92em; }
+  #noticeBox button { margin-top: 14px; padding: 10px 18px; border:0; border-radius:10px; background:#d32f2f; color:#fff; font-weight:600; cursor:pointer; }
+  #startBtn[disabled] { opacity:.6; cursor:not-allowed; }
+
+  #companyLogo { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1); max-width: 100vw; max-height: 100vh; opacity: .85; pointer-events: none; z-index: 1; }
+
+  #caishen { position: absolute; top: 10%; left: 0; width: 240px; height: 300px; background: url('https://i.postimg.cc/qBDyW26y/00243643-2.png') center/contain no-repeat; animation: moveLeftRight 6s ease-in-out infinite alternate; z-index: 10; }
+  @keyframes moveLeftRight { from { transform: translateX(0); } to { transform: translateX(calc(100vw - 120px)); } }
+
+  #bottomBanner { position: fixed; bottom: 0; left: 0; width: 100%; height: 150px; background: url('https://img.capalangresource.com/images/public/cpwl/slideshow/WLLB7/GENERAL/slideshow_20250426022829742.gif') center/cover no-repeat; z-index: 15; pointer-events:none; }
+
+  #bigRedPacket { position: relative; width: 200px; height: 260px; background: url('https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png') center/contain no-repeat; cursor: pointer; animation: pulse 2s infinite; z-index: 20; }
+  #bigRedPacket.disabled { filter: grayscale(1) opacity(.6); pointer-events:none; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  #bigRedPacket.opening { animation: openPop 700ms ease-out forwards; }
+  @keyframes openPop { 0%{transform:scale(1) rotate(0)} 40%{transform:scale(1.15) rotate(-4deg)} 65%{transform:scale(.98) rotate(2deg)} 100%{transform:scale(1) rotate(0)} }
+
+  .coin { position: fixed; width: 28px; height: 28px; left: var(--x,50%); top: var(--y,50%); transform: translate(-50%,-50%) rotate(var(--r,0deg)); opacity:0; pointer-events:none; will-change: transform, opacity; z-index: 2000; background-image: var(--img); background-position:center; background-repeat:no-repeat; background-size:contain; animation: coin-burst 900ms ease-out forwards; }
+  @keyframes coin-burst { 0%{opacity:1;transform:translate(-50%,-50%) scale(.6) rotate(var(--r))} 100%{opacity:0;transform:translate(calc(-50% + var(--dx,0px)),calc(-50% + var(--dy,0px))) scale(1.1) rotate(calc(var(--r) + 360deg))} }
+
+  #rewardPopup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,0,40,.95); padding: 20px 30px 50px; border-radius: 12px; display: none; font-size: 1.5em; z-index: 9999; text-align: center; color: #fff; }
+  .gold-text { background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  #captchaCode { display: none; margin-top: 12px; font-size: 1.2em; letter-spacing: .15em; background: #300040; padding: 6px 12px; border-radius: 6px; font-weight: bold; color: #FFD700; }
+  .copy-btn { margin-top: 12px; padding: 10px 20px; background: #28a745; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:1em; }
+
+  /* 🔒 Hidden Test Unlock Button (dev-only; hidden from customers) */
+  #devUnlockBtn{display:none;position:fixed;right:16px;bottom:16px;z-index:10001;padding:10px 14px;border:none;border-radius:999px;background:#111;color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:.92}
+  #devUnlockBtn:active{transform:scale(.96)}
 </style>
 </head>
 <body>
-  <!-- 其余元素保留不变 -->
+  <div id="noticeOverlay">
+    <div id="noticeBox">
+      <h2>🧧 Play Guidelines</h2>
+      <p>Random Angpao every <strong>Wednesday</strong> from <strong>SGD $3.88</strong> to <strong>SGD $88.88</strong>.</p>
+      <p class="small">Available once per user.</p>
+      <p id="unlockMsg" class="small" style="margin-top:8px"></p>
+      <button id="startBtn" disabled>Start</button>
+    </div>
+  </div>
+
+  <img id="companyLogo" src="https://img.capalangresource.com/images/public/cpwl/banner/WLLB7/GENERAL/banner_20250426050341681.webp" alt="Company Logo"/>
+  <div id="caishen" aria-hidden="true"></div>
+  <div id="bigRedPacket" class="disabled" onclick="openRedPacket()" aria-label="Open lucky packet"></div>
+
+  <div id="rewardPopup" role="dialog" aria-modal="true" aria-labelledby="rewardNumber">
+    🎉 You got SGD <span class="gold-text">$</span> <span id="rewardNumber" class="gold-text">0.00</span> Bonus!<br/>
+    <div id="captchaCode" aria-live="polite"></div>
+    <p style="color: #ff4444; font-weight: bold;">🚨 Please Screenshot and send to admin.</p>
+    <button class="copy-btn" onclick="copyCode()">Copy Verification Code</button>
+  </div>
+
+  <div id="bottomBanner" aria-hidden="true"></div>
+
+  <audio id="bgMusic" src="https://github.com/Elynnn-wc/my-music/raw/refs/heads/main/Agent%20Mix%20-%20Qingyi.mp3" preload="none" loop></audio>
+  <audio id="openSound" src="https://github.com/Elynnn-wc/my-music/raw/refs/heads/main/cha-ching-7053.mp3" preload="auto"></audio>
+
+  <!-- Hidden dev unlock button -->
+  <button id="devUnlockBtn" type="button" aria-hidden="true" title="Developer Test">Test</button>
 
 <script>
-  // ... 前面代码保留 ...
+  const WORKER_URL = "https://caishen-draw.elynnn598.workers.dev";
+  const COIN_IMG = "https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png";
+  const companyId = "LB7";
+  const pageId = "page1";
+  let gameStarted = false;
 
-  // Dev-only hidden unlock control — 改为点击 bigRedPacket 区域触发
+  // Shift+R: 清空并设置测试模式强制解锁
+  document.addEventListener("keydown", function(e) {
+    if (e.shiftKey && e.key.toLowerCase() === "r") {
+      try { sessionStorage.setItem('forceUnlock', '1'); } catch {}
+      localStorage.clear();
+      location.reload();
+    }
+  });
+
+  // KL timezone helpers
+  function getKLDate(){
+    return new Date(new Date().toLocaleString('en-US',{ timeZone:'Asia/Kuala_Lumpur' }));
+  }
+  function isWednesdayKL(){
+    return getKLDate().getDay() === 3; // 0 Sun ... 3 Wed
+  }
+  function nextWednesdayZero(){
+    const now = getKLDate();
+    const day = now.getDay();
+    let add = (3 - day + 7) % 7; // days until Wed
+    if (add === 0) add = 7; // countdown to next Wed 00:00 if today is Wed
+    const d = new Date(now);
+    d.setDate(now.getDate() + add);
+    d.setHours(0,0,0,0);
+    return d;
+  }
+  function formatCountdown(ms){
+    const s = Math.max(0, Math.floor(ms/1000));
+    const d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60), sec = s%60;
+    const parts = [];
+    if(d) parts.push(d+"d"); if(h||parts.length) parts.push(h+"h"); if(m||parts.length) parts.push(m+"m"); parts.push(sec+"s");
+    return parts.join(" ");
+  }
+
+  // Setup notice gating
+  function setupNotice(){
+    const overlay = document.getElementById('noticeOverlay');
+    const msg = document.getElementById('unlockMsg');
+    const btn = document.getElementById('startBtn');
+    const packet = document.getElementById('bigRedPacket');
+
+    const forced = sessionStorage.getItem('forceUnlock') === '1';
+
+    if (isWednesdayKL() || forced) {
+      msg.textContent = forced ? 'Test mode — unlocked via Shift+R' : "It's Wednesday — tap Start to play!";
+      btn.disabled = false;
+      btn.onclick = ()=>{
+        gameStarted = true;
+        overlay.style.display = 'none';
+        packet.classList.remove('disabled');
+        const bg = document.getElementById('bgMusic');
+        if(bg){ bg.volume = 0.5; bg.play().catch(()=>{}); }
+        try { sessionStorage.removeItem('forceUnlock'); } catch {}
+      };
+    } else {
+      btn.disabled = true;
+      const target = nextWednesdayZero();
+      const tick = ()=>{
+        const now = getKLDate();
+        const ms = target - now;
+        msg.textContent = 'Unlocks on Wednesday. Next open in: ' + formatCountdown(ms);
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', setupNotice);
+
+  function animateNumber(el, target, duration = 1600, onDone){
+    target = Number(target) || 0;
+    const fmt = new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    let from = parseFloat((el.textContent||'').replace(/[^0-9.\-]/g,''));
+    if (isNaN(from)) from = 0;
+    const start = performance.now();
+    const tick = (now)=>{
+      const p = Math.min((now-start)/duration, 1);
+      const e = 1 - Math.pow(1 - p, 3);
+      const val = from + (target - from)*e;
+      el.textContent = fmt.format(val);
+      if (p < 1) requestAnimationFrame(tick); else { el.textContent = fmt.format(target); onDone && onDone(); }
+    };
+    requestAnimationFrame(tick);
+  }
+
+  async function openRedPacket(){
+    if (!gameStarted) return; // require Start
+    const big = document.getElementById('bigRedPacket');
+    if (!big || big.dataset.lock === '1') return;
+    if (localStorage.getItem('hasClaimedReward')) { alert('Reward already claimed.'); return; }
+
+    big.dataset.lock = '1';
+    big.classList.add('opening');
+
+    const openSnd = document.getElementById('openSound');
+    if(openSnd){ openSnd.currentTime = 0; openSnd.play().catch(()=>{}); }
+
+    const rect = big.getBoundingClientRect();
+    createConfetti(rect.left + rect.width/2, rect.top + rect.height*0.35);
+
+    let reward, captchaCode;
+    try {
+      const resp = await fetch(`${WORKER_URL}/draw`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId, pageId })
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Service error');
+      reward = data.amount; captchaCode = data.code;
+    } catch (e) {
+      big.dataset.lock = '0';
+      big.classList.remove('opening');
+      alert('Service busy, try again.');
+      return;
+    }
+
+    const popup = document.getElementById('rewardPopup');
+    const numberEl = document.getElementById('rewardNumber');
+    const captchaEl = document.getElementById('captchaCode');
+    popup.style.display = 'block';
+    captchaEl.style.display = 'none';
+    animateNumber(numberEl, Number(reward), 1600, ()=>{
+      captchaEl.textContent = `Verification Code: ${captchaCode}`;
+      captchaEl.dataset.code = captchaCode;
+      captchaEl.style.display = 'block';
+    });
+    localStorage.setItem('hasClaimedReward', '1');
+    big.style.pointerEvents = 'none';
+  }
+
+  function createConfetti(cx, cy){
+    const pieces = 16;
+    for (let i=0;i<pieces;i++){
+      const el = document.createElement('div');
+      el.className = 'coin';
+      const angle = (Math.PI*2) * (i/pieces) + (Math.random()*0.8-0.4);
+      const distance = 100 + Math.random()*90;
+      const dx = Math.cos(angle)*distance;
+      const dy = Math.sin(angle)*distance;
+      const r = Math.floor(Math.random()*360) + 'deg';
+      el.style.setProperty('--img', `url(${COIN_IMG})`);
+      el.style.setProperty('--x', cx + 'px');
+      el.style.setProperty('--y', cy + 'px');
+      el.style.setProperty('--dx', dx + 'px');
+      el.style.setProperty('--dy', dy + 'px');
+      el.style.setProperty('--r', r);
+      document.body.appendChild(el);
+      el.addEventListener('animationend', ()=> el.remove());
+    }
+  }
+
+  function copyCode(){
+    const el = document.getElementById('captchaCode');
+    const code = el?.dataset?.code;
+    if (!code) return;
+    if (navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(code).then(()=> alert('Verification code copied'));
+    }
+  }
+
   (function(){
     const btn = document.getElementById('devUnlockBtn');
     if(!btn) return;
