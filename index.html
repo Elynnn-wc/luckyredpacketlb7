@@ -13,12 +13,10 @@
   body {
     margin: 0;
     overflow: hidden;
-    background: url('https://img.freepik.com/free-vector/watercolor-sugar-cotton-clouds-background_79603-2380.jpg') center/cover no-repeat;
+    background: #0b0b12;
     font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
     height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: flex; justify-content: center; align-items: center;
   }
   /* Play Notice */
   #noticeOverlay {
@@ -36,18 +34,18 @@
 
   #companyLogo { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1); max-width: 100vw; max-height: 100vh; opacity: .85; pointer-events: none; z-index: 1; }
 
-  #caishen { position: absolute; top: 10%; left: 0; width: 240px; height: 300px; background: url('https://i.postimg.cc/qBDyW26y/00243643-2.png') center/contain no-repeat; animation: moveLeftRight 6s ease-in-out infinite alternate; z-index: 10; }
+  #caishen { position: absolute; top: 10%; left: 0; width: 240px; height: 300px; background: center/contain no-repeat; animation: moveLeftRight 6s ease-in-out infinite alternate; z-index: 10; }
   @keyframes moveLeftRight { from { transform: translateX(0); } to { transform: translateX(calc(100vw - 120px)); } }
 
-  #bottomBanner { position: fixed; bottom: 0; left: 0; width: 100%; height: 150px; background: url('https://img.capalangresource.com/images/public/cpwl/slideshow/WLLB7/GENERAL/slideshow_20250426022829742.gif') center/cover no-repeat; z-index: 15; pointer-events:none; }
+  #bottomBanner { position: fixed; bottom: 0; left: 0; width: 100%; height: 150px; background: center/cover no-repeat; z-index: 15; pointer-events:none; }
 
-  #bigRedPacket { position: relative; width: 200px; height: 260px; background: url('https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png') center/contain no-repeat; cursor: pointer; animation: pulse 2s infinite; z-index: 20; }
+  #bigRedPacket { position: relative; width: 200px; height: 260px; background: center/contain no-repeat; cursor: pointer; animation: pulse 2s infinite; z-index: 20; }
   #bigRedPacket.disabled { filter: grayscale(1) opacity(.6); pointer-events:none; }
   @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
   #bigRedPacket.opening { animation: openPop 700ms ease-out forwards; }
   @keyframes openPop { 0%{transform:scale(1) rotate(0)} 40%{transform:scale(1.15) rotate(-4deg)} 65%{transform:scale(.98) rotate(2deg)} 100%{transform:scale(1) rotate(0)} }
 
-  .coin { position: fixed; width: 28px; height: 28px; left: var(--x,50%); top: var(--y,50%); transform: translate(-50%,-50%) rotate(var(--r,0deg)); opacity:0; pointer-events:none; will-change: transform, opacity; z-index: 2000; background-image: var(--img); background-position:center; background-repeat:no-repeat; background-size:contain; animation: coin-burst 900ms ease-out forwards; }
+  .coin { position: fixed; width: 28px; height: 28px; left: var(--x,50%); top: var(--y,50%); transform: translate(-50%,-50%) rotate(var(--r,0deg)); opacity:0; pointer-events:none; will-change: transform, opacity; z-index: 2000; background-position:center; background-repeat:no-repeat; background-size:contain; animation: coin-burst 900ms ease-out forwards; }
   @keyframes coin-burst { 0%{opacity:1;transform:translate(-50%,-50%) scale(.6) rotate(var(--r))} 100%{opacity:0;transform:translate(calc(-50% + var(--dx,0px)),calc(-50% + var(--dy,0px))) scale(1.1) rotate(calc(var(--r) + 360deg))} }
 
   #rewardPopup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,0,40,.95); padding: 20px 30px 50px; border-radius: 12px; display: none; font-size: 1.5em; z-index: 9999; text-align: center; color: #fff; }
@@ -71,7 +69,7 @@
     </div>
   </div>
 
-  <img id="companyLogo" src="https://img.capalangresource.com/images/public/cpwl/banner/WLLB7/GENERAL/banner_20250426050341681.webp" alt="Company Logo"/>
+  <img id="companyLogo" alt="Company Logo"/>
   <div id="caishen" aria-hidden="true"></div>
   <div id="bigRedPacket" class="disabled" onclick="openRedPacket()" aria-label="Open lucky packet"></div>
 
@@ -110,14 +108,91 @@
     }
   } catch (err) { console.warn('Firebase init skipped:', err); }
 
-  /* ===== Constants & state ===== */
+  /* ===== 识别公司/页面（page 只影响抽奖；样式按公司统一） ===== */
   const WORKER_URL = "https://caishen-draw.elynnn598.workers.dev";
-  const COIN_IMG = "https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png";
-  const companyId = "LB7";
-  const pageId = "page1";
+  const q = new URLSearchParams(location.search);
+
+  function detectContext() {
+    const h = location.hostname.toLowerCase();
+    let companyId = (q.get("c") || q.get("company") || "").toUpperCase();
+    let pageId    = q.get("p") || q.get("page") || "";
+
+    if (!companyId) {
+      if (h.startsWith("ryb-")) companyId = "RYB";
+      else if (h.startsWith("sgb-")) companyId = "SGB";
+      else companyId = "LB7";
+    }
+    if (!pageId) {
+      if (/(goldwin|silvermoon|forest)/.test(h)) pageId = "page2";
+      else if (/(luckyjade|starfire|mountain)/.test(h)) pageId = "page3";
+      else pageId = "page1";
+    }
+    return { companyId, pageId };
+  }
+  const { companyId, pageId } = detectContext();
   let gameStarted = false;
 
-  // Shift+R: 清空并设置测试模式强制解锁
+  /* ===== 公司主题（当前只填了 LB7；其余待你给素材） ===== */
+  const COMPANY_THEME = {
+    LB7: {
+      bg: "https://img.freepik.com/free-vector/watercolor-sugar-cotton-clouds-background_79603-2380.jpg",
+      logoOverlay: "https://img.capalangresource.com/images/public/cpwl/banner/WLLB7/GENERAL/banner_20250426050341681.webp",
+      caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
+      bottomBanner: "https://img.capalangresource.com/images/public/cpwl/slideshow/WLLB7/GENERAL/slideshow_20250426022829742.gif",
+      packetImg: "https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png",
+      coinImg: "https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png",
+      colors: { bg: "#0b0b12", primary: "#F5C84B", accent: "#8128FF" },
+    },
+    RYB: { bg:"",logoOverlay:"",caishenSprite:"",bottomBanner:"",packetImg:"",coinImg:"",colors:{bg:"#0A0E18",primary:"#FF5D5D",accent:"#1EC8FF"} },
+    SGB: { bg:"",logoOverlay:"",caishenSprite:"",bottomBanner:"",packetImg:"",coinImg:"",colors:{bg:"#081012",primary:"#26DB9A",accent:"#FFD166"} },
+  };
+
+  /* ===== 应用主题（按公司统一皮肤） ===== */
+  let COIN_IMG = "";
+  function applyTheme() {
+    const theme = COMPANY_THEME[companyId] || COMPANY_THEME.LB7;
+
+    // 背景
+    if (theme.bg) document.body.style.background = `url('${theme.bg}') center/cover no-repeat`;
+
+    // 叠加 logo
+    const elLogo = document.getElementById("companyLogo");
+    if (elLogo && theme.logoOverlay) elLogo.src = theme.logoOverlay;
+
+    // 财神
+    const elCai = document.getElementById("caishen");
+    if (elCai && theme.caishenSprite) elCai.style.backgroundImage = `url('${theme.caishenSprite}')`;
+
+    // 底部 banner
+    const elBottom = document.getElementById("bottomBanner");
+    if (elBottom && theme.bottomBanner) elBottom.style.backgroundImage = `url('${theme.bottomBanner}')`;
+
+    // 红包图
+    const elPacket = document.getElementById("bigRedPacket");
+    if (elPacket && theme.packetImg) elPacket.style.backgroundImage = `url('${theme.packetImg}')`;
+
+    // 金币粒子
+    COIN_IMG = theme.coinImg || COIN_IMG;
+
+    // 主题色（如需用到）
+    document.documentElement.style.setProperty("--bg", theme.colors.bg);
+    document.documentElement.style.setProperty("--primary", theme.colors.primary);
+    document.documentElement.style.setProperty("--accent", theme.colors.accent);
+
+    // 内部角标（?staff=8899）
+    if (q.get("staff")==="8899") {
+      const tag = document.createElement("div");
+      tag.textContent = `${companyId} · ${pageId}`;
+      Object.assign(tag.style,{
+        position:"fixed",right:"8px",bottom:"8px",padding:"6px 10px",
+        background:"rgba(0,0,0,.6)",color:"#fff",borderRadius:"8px",fontSize:"12px",zIndex:9999
+      });
+      document.body.appendChild(tag);
+    }
+  }
+  document.addEventListener("DOMContentLoaded", applyTheme);
+
+  /* ===== Shift+R: 清空并设置测试模式强制解锁 ===== */
   document.addEventListener("keydown", function(e) {
     if (e.shiftKey && e.key.toLowerCase() === "r") {
       try { sessionStorage.setItem('forceUnlock', '1'); } catch {}
@@ -127,12 +202,8 @@
   });
 
   /* ===== KL timezone helpers ===== */
-  function getKLDate(){
-    return new Date(new Date().toLocaleString('en-US',{ timeZone:'Asia/Kuala_Lumpur' }));
-  }
-  function isWednesdayKL(){
-    return getKLDate().getDay() === 3; // 0 Sun ... 3 Wed
-  }
+  function getKLDate(){ return new Date(new Date().toLocaleString('en-US',{ timeZone:'Asia/Kuala_Lumpur' })); }
+  function isWednesdayKL(){ return getKLDate().getDay() === 3; } // 0 Sun ... 3 Wed
   function nextWednesdayZero(){
     const now = getKLDate();
     const day = now.getDay();
@@ -335,6 +406,14 @@
       location.reload();
     });
   })();
+
+  // 初始化：DOMReady 后应用主题 & 通知门槛
+  document.addEventListener('DOMContentLoaded', ()=>{
+    applyTheme();
+    setupNotice();
+    // 初始化红包与财神的背景图（确保主题已设置好）
+    // （已在 applyTheme 中设置）
+  });
 </script>
 </body>
 </html>
