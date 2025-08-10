@@ -10,14 +10,32 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
 <style>
+  /* ===== Global & Background (iOS-safe) ===== */
+  :root {
+    --logo-max-w: 80vw;
+    --logo-max-h: 18vh;
+    --logo-gap: 20px;     /* Logo 底部与财神之间的间距 */
+    --cai-w: 180px;       /* 财神宽 */
+    --cai-h: 220px;       /* 财神高 */
+  }
   body {
     margin: 0;
-    overflow: hidden;
-    background: #0b0b12;
-    font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
     height: 100vh;
+    overflow: hidden;
+    background: none; /* 背景交给伪元素 */
+    font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
     display: flex; justify-content: center; align-items: center;
+    position: relative;
   }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: var(--bg-url, #0b0b12) center / cover no-repeat;
+    z-index: -1;
+    transform: translateZ(0); /* 防止 iOS 背景跳动 */
+  }
+
   /* Play Notice */
   #noticeOverlay {
     position: fixed; inset: 0; z-index: 10000;
@@ -32,22 +50,59 @@
   #noticeBox button { margin-top: 14px; padding: 10px 18px; border:0; border-radius:10px; background:#d32f2f; color:#fff; font-weight:600; cursor:pointer; }
   #startBtn[disabled] { opacity:.6; cursor:not-allowed; }
 
-  #companyLogo { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1); max-width: 100vw; max-height: 100vh; opacity: .85; pointer-events: none; z-index: 1; }
+  /* ===== Logo 顶部固定，不被遮挡 ===== */
+  #companyLogo {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: var(--logo-max-w);
+    max-height: var(--logo-max-h);
+    width: auto;
+    height: auto;
+    opacity: .9;
+    pointer-events: none;
+    z-index: 20;
+  }
 
-  #caishen { position: absolute; top: 10%; left: 0; width: 240px; height: 300px; background: center/contain no-repeat; animation: moveLeftRight 6s ease-in-out infinite alternate; z-index: 10; }
-  @keyframes moveLeftRight { from { transform: translateX(0); } to { transform: translateX(calc(100vw - 120px)); } }
+  /* ===== 财神缩小，位于 Logo 下方并左右移动 ===== */
+  #caishen {
+    position: absolute;
+    top: calc(var(--logo-max-h) + var(--logo-gap)); /* 在 logo 下方 */
+    left: 0;
+    width: var(--cai-w);
+    height: var(--cai-h);
+    background: center/contain no-repeat;
+    animation: moveLeftRight 6s ease-in-out infinite alternate;
+    z-index: 10;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+  @keyframes moveLeftRight {
+    from { transform: translateX(0) translateZ(0); }
+    to   { transform: translateX(calc(100vw - var(--cai-w))) translateZ(0); }
+  }
 
+  /* ===== 底部 Banner ===== */
   #bottomBanner { position: fixed; bottom: 0; left: 0; width: 100%; height: 150px; background: center/cover no-repeat; z-index: 15; pointer-events:none; }
 
-  #bigRedPacket { position: relative; width: 200px; height: 260px; background: center/contain no-repeat; cursor: pointer; animation: pulse 2s infinite; z-index: 20; }
+  /* ===== 红包主按钮（GPU 合成优化） ===== */
+  #bigRedPacket { position: relative; width: 200px; height: 260px; background: center/contain no-repeat; cursor: pointer; animation: pulse 2s infinite; z-index: 20;
+    will-change: transform; transform: translateZ(0); backface-visibility: hidden; }
   #bigRedPacket.disabled { filter: grayscale(1) opacity(.6); pointer-events:none; }
-  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+  @keyframes pulse { 0%,100%{transform:scale(1) translateZ(0)} 50%{transform:scale(1.05) translateZ(0)} }
   #bigRedPacket.opening { animation: openPop 700ms ease-out forwards; }
-  @keyframes openPop { 0%{transform:scale(1) rotate(0)} 40%{transform:scale(1.15) rotate(-4deg)} 65%{transform:scale(.98) rotate(2deg)} 100%{transform:scale(1) rotate(0)} }
+  @keyframes openPop { 0%{transform:scale(1) rotate(0) translateZ(0)} 40%{transform:scale(1.15) rotate(-4deg) translateZ(0)} 65%{transform:scale(.98) rotate(2deg) translateZ(0)} 100%{transform:scale(1) rotate(0) translateZ(0)} }
 
-  .coin { position: fixed; width: 28px; height: 28px; left: var(--x,50%); top: var(--y,50%); transform: translate(-50%,-50%) rotate(var(--r,0deg)); opacity:0; pointer-events:none; will-change: transform, opacity; z-index: 2000; background: var(--img, url('https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png')) center/contain no-repeat; animation: coin-burst 900ms ease-out forwards; }
-  @keyframes coin-burst { 0%{opacity:1;transform:translate(-50%,-50%) scale(.6) rotate(var(--r))} 100%{opacity:0;transform:translate(calc(-50% + var(--dx,0px)),calc(-50% + var(--dy,0px))) scale(1.1) rotate(calc(var(--r) + 360deg))} }
+  /* ===== 金币粒子（translate3d 更顺滑） ===== */
+  .coin { position: fixed; width: 28px; height: 28px; left: var(--x,50%); top: var(--y,50%); transform: translate3d(-50%,-50%,0) rotate(var(--r,0deg)); opacity:0; pointer-events:none; will-change: transform, opacity; z-index: 2000; background: var(--img, url('https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png')) center/contain no-repeat; animation: coin-burst 900ms ease-out forwards; }
+  @keyframes coin-burst {
+    0%{opacity:1;transform:translate3d(-50%,-50%,0) scale(.6) rotate(var(--r))}
+    100%{opacity:0;transform:translate3d(calc(-50% + var(--dx,0px)),calc(-50% + var(--dy,0px)),0) scale(1.1) rotate(calc(var(--r) + 360deg))}
+  }
 
+  /* ===== 弹窗 ===== */
   #rewardPopup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,0,40,.95); padding: 20px 30px 50px; border-radius: 12px; display: none; font-size: 1.5em; z-index: 9999; text-align: center; color: #fff; }
   .gold-text { background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   #captchaCode { display: none; margin-top: 12px; font-size: 1.2em; letter-spacing: .15em; background: #300040; padding: 6px 12px; border-radius: 6px; font-weight: bold; color: #FFD700; }
@@ -69,10 +124,16 @@
     </div>
   </div>
 
+  <!-- 顶部固定 Logo -->
   <img id="companyLogo" alt="Company Logo"/>
+
+  <!-- 财神（缩小，不遮挡 Logo） -->
   <div id="caishen" aria-hidden="true"></div>
+
+  <!-- 主红包按钮 -->
   <div id="bigRedPacket" class="disabled" onclick="openRedPacket()" aria-label="Open lucky packet"></div>
 
+  <!-- 中奖弹窗 -->
   <div id="rewardPopup" role="dialog" aria-modal="true" aria-labelledby="rewardNumber">
     🎉 You got SGD <span class="gold-text">$</span> <span id="rewardNumber" class="gold-text">0.00</span> Bonus!<br/>
     <div id="captchaCode" aria-live="polite"></div>
@@ -132,12 +193,11 @@
   const { companyId, pageId } = detectContext();
   let gameStarted = false;
 
-  /* ===== 公司主题（支持可调 logoStyle / bannerStyle） ===== */
+  /* ===== 公司主题（忽略定位 style，统一用顶部 Logo 布局） ===== */
   const COMPANY_THEME = {
     LB7: {
       bg: "https://img.freepik.com/free-vector/watercolor-sugar-cotton-clouds-background_79603-2380.jpg",
       logoOverlay: "https://img.capalangresource.com/images/public/cpwl/banner/WLLB7/GENERAL/banner_20250426050341681.webp",
-      logoStyle: { maxWidth: "90vw", maxHeight: "90vh", opacity: "0.85", top: "50%", left: "50%", transform: "translate(-50%, -50%) scale(1)" },
 
       caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
       bottomBanner: "https://img.capalangresource.com/images/public/cpwl/slideshow/WLLB7/GENERAL/slideshow_20250426022829742.gif",
@@ -148,39 +208,41 @@
       colors: { bg: "#0b0b12", primary: "#F5C84B", accent: "#8128FF" },
     },
     RYB: {
-      bg: "https://www.freevector.com/uploads/vector/preview/37239/vecteezy_Black-Gold-Geometric_Background_fv0321_generated.jpg",
+      bg: "https://img.freepik.com/free-photo/light-background_24972-1415.jpg?semt=ais_hybrid&w=740&q=80",
       logoOverlay: "https://i.postimg.cc/wMnJztTD/RYB-4-1.png",
-      logoStyle: { width: "60vw", maxWidth: "520px", top: "42%", left: "50%", transform: "translate(-50%, -50%)", opacity: "0.9" },
 
-      caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png", /* 暂共用 LB7 */
+      caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
       bottomBanner: "https://i.postimg.cc/NfPCybLx/RYB-3-1.png",
-      bannerStyle: { height: "120px", backgroundSize: "cover", backgroundPosition: "center" },
+      bannerStyle: { height: "110px", backgroundSize: "cover", backgroundPosition: "center" },
 
-      packetImg: "https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png",  /* 暂共用 LB7 */
-      coinImg: "https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png", /* 暂共用 LB7 */
+      packetImg: "https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png",
+      coinImg: "https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png",
       colors: { bg: "#0A0E18", primary: "#ff7d4d", accent: "#f11010" }
     },
     SGB: {
-      bg:"", logoOverlay:"", logoStyle:{},
-      caishenSprite:"", bottomBanner:"", bannerStyle:{},
-      packetImg:"", coinImg:"",
+      bg:"https://images.rawpixel.com/image_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTEyL21vdGFybzdfYWJzdHJhY3RfZ29sZF9iYWNrZ3JvdW5kX3dpdGhfdGhpbl9saW5lc19vbl93aGl0ZV9iYWNrZ19hMTAyOTg1OC00NjNiLTRiY2MtOGZhMy00YTgyNGZiOGEwZDdfMS5qcGc.jpg", 
+      logoOverlay:"https://singabet.net/images/singabet/logo2.png", 
+      caishenSprite:"https://i.postimg.cc/qBDyW26y/00243643-2.png",
+      bottomBanner:"https://i.postimg.cc/Hkn6MR7v/329426b2-1880-478e-ad09-cd0cab7fce64-removebg-preview.png", 
+      bannerStyle:{ height: "110px", backgroundSize: "cover", backgroundPosition: "center" },
+      packetImg: "https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png",
+      coinImg: "https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png",
       colors:{ bg:"#081012", primary:"#26DB9A", accent:"#FFD166" }
     }
   };
 
-  /* ===== 应用主题（按公司统一皮肤 + 可调样式） ===== */
+  /* ===== 应用主题（统一顶部 Logo，背景用变量驱动） ===== */
   let COIN_IMG = "";
   function applyTheme() {
     const theme = COMPANY_THEME[companyId] || COMPANY_THEME.LB7;
 
-    // 背景
-    if (theme.bg) document.body.style.background = `url('${theme.bg}') center/cover no-repeat`;
+    // 背景（改为变量驱动到 body::before，避免 iOS 跳动）
+    if (theme.bg) document.body.style.setProperty("--bg-url", `url('${theme.bg}')`);
 
-    // 叠加 logo + 自定义样式
+    // 顶部 Logo（不再应用 theme.logoStyle 定位，统一用 CSS）
     const elLogo = document.getElementById("companyLogo");
     if (elLogo && theme.logoOverlay) {
       elLogo.src = theme.logoOverlay;
-      if (theme.logoStyle) Object.assign(elLogo.style, theme.logoStyle);
     }
 
     // 财神
