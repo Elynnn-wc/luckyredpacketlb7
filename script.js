@@ -52,7 +52,7 @@ const COMPANY_THEME = {
     cssClass: "theme-lb7"
   },
   RYB: {
-    bg: "https://i.postimg.cc/zGj3M3hV/black-gold.jpg", // Setting to a generic dark placeholder, handled mostly by css bg color fallback
+    bg: "", // Leave blank to allow the pure CSS luxury gradients to take over
     logoOverlay: "https://i.postimg.cc/wMnJztTD/RYB-4-1.png",
     caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
     bottomBanner: "https://i.postimg.cc/NfPCybLx/RYB-3-1.png",
@@ -61,7 +61,7 @@ const COMPANY_THEME = {
     cssClass: "theme-ryb"
   },
   SGB: {
-    bg: "https://i.postimg.cc/qvsM5fWg/white-gold.jpg", // Setting to a generic light placeholder
+    bg: "", // Leave blank for pure CSS luxury gradients
     logoOverlay: "https://singabet.net/images/singabet/logo2.png", 
     caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
     bottomBanner: "https://i.postimg.cc/Hkn6MR7v/329426b2-1880-478e-ad09-cd0cab7fce64-removebg-preview.png", 
