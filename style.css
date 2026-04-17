@@ -44,8 +44,8 @@ body::before {
 /* RYB Theme: Black & Gold */
 body.theme-ryb {
   --highlight-color: #d4af37;
-  --bg-url: none;
-  background: radial-gradient(circle at 50% 0%, #1a160b 0%, #050505 80%);
+  --bg-url: url('./vip_bg.png');
+  background: none;
   --notice-bg: rgba(10, 10, 12, 0.85);
   --notice-shadow: rgba(212, 175, 55, 0.5);
   --btn-grad1: #bf953f;
