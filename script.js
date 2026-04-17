@@ -52,7 +52,7 @@ const COMPANY_THEME = {
     cssClass: "theme-lb7"
   },
   RYB: {
-    bg: "", // Leave blank to allow the pure CSS luxury gradients to take over
+    bg: "./vip_bg.png", 
     logoOverlay: "https://i.postimg.cc/wMnJztTD/RYB-4-1.png",
     caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
     bottomBanner: "https://i.postimg.cc/NfPCybLx/RYB-3-1.png",
