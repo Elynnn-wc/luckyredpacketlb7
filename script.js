@@ -53,7 +53,7 @@ const COMPANY_THEME = {
   },
   RYB: {
     bg: "./vip_bg.png", 
-    logoOverlay: "https://i.postimg.cc/wMnJztTD/RYB-4-1.png",
+    logoOverlay: "https://postimg.cc/bS8X7F4m/af615e55",
     caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
     bottomBanner: "https://i.postimg.cc/NfPCybLx/RYB-3-1.png",
     packetImg: "https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png",
