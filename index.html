@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Caishen Big Red Packet</title>
 
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
 <!-- Firebase SDK (compat) -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -23,7 +28,7 @@
     height: 100vh;
     overflow: hidden;
     background: none; /* 背景交给伪元素 */
-    font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     display: flex; justify-content: center; align-items: center;
     position: relative;
   }
@@ -39,16 +44,31 @@
   /* Play Notice */
   #noticeOverlay {
     position: fixed; inset: 0; z-index: 10000;
-    background: rgba(0,0,0,.88); color:#fff;
+    background: rgba(0,0,0,.75); color:#fff;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     text-align:center; padding: 24px;
   }
-  #noticeBox { background:#4b1c9c; max-width: 560px; width: min(92vw,560px); padding: 28px 24px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
-  #noticeBox h2 { margin: 0 0 10px; }
-  #noticeBox p { margin: 6px 0; }
-  #noticeBox .small { opacity:.9; font-size:.92em; }
-  #noticeBox button { margin-top: 14px; padding: 10px 18px; border:0; border-radius:10px; background:#d32f2f; color:#fff; font-weight:600; cursor:pointer; }
-  #startBtn[disabled] { opacity:.6; cursor:not-allowed; }
+  #noticeBox { 
+    background: rgba(20, 20, 25, 0.6); 
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 20px 40px rgba(0,0,0,.6), inset 0 0 20px rgba(255,215,0,0.05);
+    max-width: 560px; width: min(92vw,560px); padding: 32px 24px; border-radius: 16px; 
+  }
+  #noticeBox h2 { margin: 0 0 12px; font-family: 'Cinzel', serif; font-size: 2rem; color: #FFD700; text-shadow: 0 2px 10px rgba(255,215,0,0.4); }
+  #noticeBox p { margin: 8px 0; color: #E0E0E0; line-height: 1.5; }
+  #noticeBox .small { opacity:.8; font-size:.92em; color: #B0B0B0; }
+  #noticeBox button { 
+    margin-top: 20px; padding: 14px 36px; border:0; border-radius:12px; 
+    background: linear-gradient(135deg, #FFD700, #FDB931, #FFD700); background-size: 200% 200%;
+    color: #1a1a1a; font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight:800; cursor:pointer; 
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); transition: all 0.3s ease;
+  }
+  #noticeBox button:hover:not([disabled]) {
+    transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6); background-position: 100% 50%;
+  }
+  #startBtn[disabled] { filter: grayscale(1) brightness(0.6); box-shadow: none; cursor:not-allowed; }
 
   /* ===== Logo 顶部固定，不被遮挡 ===== */
   #companyLogo {
@@ -89,11 +109,11 @@
 
   /* ===== 红包主按钮（GPU 合成优化） ===== */
   #bigRedPacket { position: relative; width: 200px; height: 260px; background: center/contain no-repeat; cursor: pointer; animation: pulse 2s infinite; z-index: 20;
-    will-change: transform; transform: translateZ(0); backface-visibility: hidden; }
+    will-change: transform, filter; transform: translateZ(0); backface-visibility: hidden; filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.3)); }
   #bigRedPacket.disabled { filter: grayscale(1) opacity(.6); pointer-events:none; }
-  @keyframes pulse { 0%,100%{transform:scale(1) translateZ(0)} 50%{transform:scale(1.05) translateZ(0)} }
+  @keyframes pulse { 0%,100%{transform:scale(1) translateZ(0); filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.3))} 50%{transform:scale(1.05) translateZ(0); filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.6))} }
   #bigRedPacket.opening { animation: openPop 700ms ease-out forwards; }
-  @keyframes openPop { 0%{transform:scale(1) rotate(0) translateZ(0)} 40%{transform:scale(1.15) rotate(-4deg) translateZ(0)} 65%{transform:scale(.98) rotate(2deg) translateZ(0)} 100%{transform:scale(1) rotate(0) translateZ(0)} }
+  @keyframes openPop { 0%{transform:scale(1) rotate(0) translateZ(0); filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.3))} 40%{transform:scale(1.15) rotate(-4deg) translateZ(0); filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.8))} 65%{transform:scale(.98) rotate(2deg) translateZ(0)} 100%{transform:scale(1) rotate(0) translateZ(0)} }
 
   /* ===== 金币粒子（translate3d 更顺滑） ===== */
   .coin { position: fixed; width: 28px; height: 28px; left: var(--x,50%); top: var(--y,50%); transform: translate3d(-50%,-50%,0) rotate(var(--r,0deg)); opacity:0; pointer-events:none; will-change: transform, opacity; z-index: 2000; background: var(--img, url('https://i.postimg.cc/3RdRN4mb/Screenshot-2025-08-10-010039-1.png')) center/contain no-repeat; animation: coin-burst 900ms ease-out forwards; }
@@ -103,10 +123,32 @@
   }
 
   /* ===== 弹窗 ===== */
-  #rewardPopup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(20,0,40,.95); padding: 20px 30px 50px; border-radius: 12px; display: none; font-size: 1.5em; z-index: 9999; text-align: center; color: #fff; }
-  .gold-text { background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  #captchaCode { display: none; margin-top: 12px; font-size: 1.2em; letter-spacing: .15em; background: #300040; padding: 6px 12px; border-radius: 6px; font-weight: bold; color: #FFD700; }
-  .copy-btn { margin-top: 12px; padding: 10px 20px; background: #28a745; color:#fff; border:0; border-radius:6px; cursor:pointer; font-size:1em; }
+  #rewardPopup { 
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+    background: rgba(15, 10, 25, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 215, 0, 0.4); box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,215,0,0.1);
+    padding: 40px 30px 50px; border-radius: 16px; display: none; font-size: 1.5em; z-index: 9999; text-align: center; color: #fff; 
+  }
+  .gold-text { 
+    font-family: 'Cinzel', serif; font-weight: 800; font-size: 1.2em;
+    background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C); 
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+    filter: drop-shadow(0 2px 4px rgba(255,215,0,0.3));
+  }
+  #captchaCode { 
+    display: none; margin-top: 20px; font-size: 1.2em; letter-spacing: .2em; 
+    background: rgba(0,0,0,0.5); border: 1px solid rgba(255,215,0,0.2); 
+    padding: 12px 18px; border-radius: 8px; font-weight: bold; color: #FDB931; 
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+  }
+  .copy-btn { 
+    margin-top: 20px; padding: 12px 24px; 
+    background: linear-gradient(135deg, #FFD700, #FDB931); color: #1a1a1a; 
+    font-family: 'Inter', sans-serif; font-weight: 700;
+    border:0; border-radius:8px; cursor:pointer; font-size:1em; 
+    box-shadow: 0 4px 15px rgba(255,215,0,0.3); transition: transform 0.2s;
+  }
+  .copy-btn:hover { transform: scale(1.05); }
 
   /* Hidden Test Unlock Button (dev-only) */
   #devUnlockBtn{display:none;position:fixed;right:16px;bottom:16px;z-index:10001;padding:10px 14px;border:none;border-radius:999px;background:#111;color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:.92}
@@ -196,7 +238,7 @@
   /* ===== 公司主题（忽略定位 style，统一用顶部 Logo 布局） ===== */
   const COMPANY_THEME = {
     LB7: {
-      bg: "https://img.freepik.com/free-vector/watercolor-sugar-cotton-clouds-background_79603-2380.jpg",
+      bg: "./vip_bg.png",
       logoOverlay: "https://img.capalangresource.com/images/public/cpwl/banner/WLLB7/GENERAL/banner_20250426050341681.webp",
 
       caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
