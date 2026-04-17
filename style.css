@@ -162,7 +162,7 @@ body.theme-sgb #bigRedPacket { filter: drop-shadow(0 0 30px rgba(218, 165, 32, 0
   to   { transform: translateX(calc(100vw - var(--cai-w))) translateZ(0); }
 }
 
-#bottomBanner { position: fixed; bottom: 0; left: 0; width: 100%; height: 150px; background: center/cover no-repeat; z-index: 15; pointer-events:none; }
+#bottomBanner { position: fixed; bottom: 0; left: 0; width: 100%; height: 150px; background: bottom center / 100% auto no-repeat; z-index: 15; pointer-events:none; }
 
 #bigRedPacket { position: relative; width: 200px; height: 260px; background: center/contain no-repeat; cursor: pointer; animation: pulse 2s infinite; z-index: 20;
   will-change: transform, filter; transform: translateZ(0); backface-visibility: hidden; filter: drop-shadow(0 0 15px var(--notice-shadow)); }
