@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>VIP Caishen Red Packet</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- Link to separated CSS styles -->
+<link rel="stylesheet" href="style.css">
+
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+</head>
+<body>
+  <div id="noticeOverlay">
+    <div id="noticeBox">
+      <h2>🧧 Play Guidelines</h2>
+      <p>Random Angpao every <strong id="openDayName">Wednesday</strong> from <strong>SGD $3.88</strong> to <strong>SGD $88.88</strong>.</p>
+      <p class="small">Available once per user daily.</p>
+      <p id="unlockMsg" class="small" style="margin-top:8px"></p>
+      <button id="startBtn" disabled>Start</button>
+    </div>
+  </div>
+
+  <!-- Top Logo -->
+  <img id="companyLogo" alt="Company Logo"/>
+
+  <!-- Caishen Element -->
+  <div id="caishen" aria-hidden="true"></div>
+
+  <!-- Main Red Packet Button -->
+  <div id="bigRedPacket" class="disabled" onclick="openRedPacket()" aria-label="Open lucky packet"></div>
+
+  <!-- Reward Pop-up -->
+  <div id="rewardPopup" role="dialog" aria-modal="true" aria-labelledby="rewardNumber">
+    🎉 You got SGD <span class="gold-text">$</span> <span id="rewardNumber" class="gold-text">0.00</span> Bonus!<br/>
+    <div id="captchaCode" aria-live="polite"></div>
+    <p style="color: #ff4444; font-weight: bold; margin-top: 20px;">🚨 Please Screenshot and send to admin.</p>
+    <button class="copy-btn" onclick="copyCode()">Copy Verification Code</button>
+  </div>
+
+  <div id="bottomBanner" aria-hidden="true"></div>
+
+  <!-- Audio Elements -->
+  <audio id="bgMusic" src="https://github.com/Elynnn-wc/my-music/raw/refs/heads/main/Agent%20Mix%20-%20Qingyi.mp3" preload="none" loop></audio>
+  <audio id="openSound" src="https://github.com/Elynnn-wc/my-music/raw/refs/heads/main/cha-ching-7053.mp3" preload="auto"></audio>
+
+  <!-- Hidden dev unlock button -->
+  <button id="devUnlockBtn" type="button" aria-hidden="true" title="Developer Test">Test</button>
+
+  <!-- External Javascript Logic -->
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+/* ===== Global & Background (iOS-safe) ===== */
+:root {
+  --logo-max-w: 80vw;
+  --logo-max-h: 18vh;
+  --logo-gap: 20px;     
+  --cai-w: 180px;       
+  --cai-h: 220px;       
+  /* Theme defaults (LB7) */
+  --highlight-color: #FFD700;
+  --bg-url: none;
+  --notice-bg: rgba(20, 20, 25, 0.6);
+  --notice-shadow: rgba(255, 215, 0, 0.3);
+  --btn-grad1: #FFD700;
+  --btn-grad2: #FDB931;
+  --btn-text: #1a1a1a;
+  --popup-bg: rgba(15, 10, 25, 0.85);
+  --text-main: #FFFFFF;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: none; 
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  display: flex; justify-content: center; align-items: center;
+  position: relative;
+  color: var(--text-main);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: var(--bg-url) center / cover no-repeat;
+  z-index: -1;
+  transform: translateZ(0); 
+}
+
+/* ========================================================
+   COMPANY THEMES (Luxury Overrides)
+======================================================== */
+
+/* RYB Theme: Black & Gold */
+body.theme-ryb {
+  --highlight-color: #d4af37;
+  --notice-bg: rgba(10, 10, 12, 0.85);
+  --notice-shadow: rgba(212, 175, 55, 0.5);
+  --btn-grad1: #bf953f;
+  --btn-grad2: #fcf6ba;
+  --btn-text: #050505;
+  --popup-bg: rgba(8, 8, 8, 0.95);
+  --text-main: #f0f0f0;
+}
+
+body.theme-ryb #noticeBox {
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.9), inset 0 0 30px rgba(212, 175, 55, 0.1);
+}
+
+body.theme-ryb #bigRedPacket {
+  filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.6));
+}
+
+/* SGB Theme: White & Gold */
+body.theme-sgb {
+  --highlight-color: #DAA520;
+  --notice-bg: rgba(255, 255, 255, 0.85);
+  --notice-shadow: rgba(218, 165, 32, 0.4);
+  --btn-grad1: #DAA520;
+  --btn-grad2: #F8E58C;
+  --btn-text: #1a1a1a;
+  --popup-bg: rgba(250, 250, 250, 0.95);
+  --text-main: #222222;
+}
+
+body.theme-sgb #noticeBox {
+  border: 1px solid rgba(218, 165, 32, 0.6);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2), inset 0 0 20px rgba(218, 165, 32, 0.1);
+}
+
+body.theme-sgb #noticeBox h2 {
+  color: #B8860B;
+  text-shadow: 0 2px 5px rgba(218, 165, 32, 0.3);
+}
+
+body.theme-sgb #noticeBox p { color: #444; }
+body.theme-sgb #rewardPopup { color: #111; border: 1px solid rgba(218, 165, 32, 0.8); }
+body.theme-sgb #bigRedPacket { filter: drop-shadow(0 0 30px rgba(218, 165, 32, 0.6)); }
+
+/* ========================================================
+   COMPONENTS
+======================================================== */
+
+#noticeOverlay {
+  position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0,0,0,.75); color: var(--text-main);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding: 24px;
+}
+#noticeBox { 
+  background: var(--notice-bg); 
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--notice-shadow);
+  box-shadow: 0 20px 40px rgba(0,0,0,.6), inset 0 0 20px rgba(255,215,0,0.05);
+  max-width: 560px; width: min(92vw,560px); padding: 32px 24px; border-radius: 16px; 
+}
+#noticeBox h2 { margin: 0 0 12px; font-family: 'Cinzel', serif; font-size: 2rem; color: var(--highlight-color); text-shadow: 0 2px 10px var(--notice-shadow); }
+#noticeBox p { margin: 8px 0; color: inherit; line-height: 1.5; }
+#noticeBox .small { opacity:.8; font-size:.92em; }
+#noticeBox button { 
+  margin-top: 20px; padding: 14px 36px; border:0; border-radius:12px; 
+  background: linear-gradient(135deg, var(--btn-grad1), var(--btn-grad2), var(--btn-grad1)); background-size: 200% 200%;
+  color: var(--btn-text); font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight:800; cursor:pointer; 
+  box-shadow: 0 4px 15px var(--notice-shadow); transition: all 0.3s ease;
+}
+#noticeBox button:hover:not([disabled]) {
+  transform: translateY(-2px); box-shadow: 0 6px 20px var(--notice-shadow); background-position: 100% 50%;
+}
+#startBtn[disabled] { filter: grayscale(1) brightness(0.6); box-shadow: none; cursor:not-allowed; }
+
+#companyLogo {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: var(--logo-max-w);
+  max-height: var(--logo-max-h);
+  width: auto;
+  height: auto;
+  opacity: .9;
+  pointer-events: none;
+  z-index: 20;
+}
+
+#caishen {
+  position: absolute;
+  top: calc(var(--logo-max-h) + var(--logo-gap));
+  left: 0;
+  width: var(--cai-w);
+  height: var(--cai-h);
+  background: center/contain no-repeat;
+  animation: moveLeftRight 6s ease-in-out infinite alternate;
+  z-index: 10;
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+@keyframes moveLeftRight {
+  from { transform: translateX(0) translateZ(0); }
+  to   { transform: translateX(calc(100vw - var(--cai-w))) translateZ(0); }
+}
+
+#bottomBanner { position: fixed; bottom: 0; left: 0; width: 100%; height: 150px; background: center/cover no-repeat; z-index: 15; pointer-events:none; }
+
+#bigRedPacket { position: relative; width: 200px; height: 260px; background: center/contain no-repeat; cursor: pointer; animation: pulse 2s infinite; z-index: 20;
+  will-change: transform, filter; transform: translateZ(0); backface-visibility: hidden; filter: drop-shadow(0 0 15px var(--notice-shadow)); }
+#bigRedPacket.disabled { filter: grayscale(1) opacity(.6); pointer-events:none; animation: none;}
+@keyframes pulse { 0%,100%{transform:scale(1) translateZ(0); filter: drop-shadow(0 0 15px var(--notice-shadow))} 50%{transform:scale(1.05) translateZ(0); filter: drop-shadow(0 0 30px var(--notice-shadow))} }
+#bigRedPacket.opening { animation: openPop 700ms ease-out forwards; }
+@keyframes openPop { 0%{transform:scale(1) rotate(0) translateZ(0)} 40%{transform:scale(1.15) rotate(-4deg) translateZ(0)} 65%{transform:scale(.98) rotate(2deg) translateZ(0)} 100%{transform:scale(1) rotate(0) translateZ(0)} }
+
+.coin { position: fixed; width: 28px; height: 28px; left: var(--x,50%); top: var(--y,50%); transform: translate3d(-50%,-50%,0) rotate(var(--r,0deg)); opacity:0; pointer-events:none; will-change: transform, opacity; z-index: 2000; background: var(--img) center/contain no-repeat; animation: coin-burst 900ms ease-out forwards; }
+@keyframes coin-burst {
+  0%{opacity:1;transform:translate3d(-50%,-50%,0) scale(.6) rotate(var(--r))}
+  100%{opacity:0;transform:translate3d(calc(-50% + var(--dx,0px)),calc(-50% + var(--dy,0px)),0) scale(1.1) rotate(calc(var(--r) + 360deg))}
+}
+
+#rewardPopup { 
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+  background: var(--popup-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--notice-shadow); box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,215,0,0.1);
+  padding: 40px 30px 50px; border-radius: 16px; display: none; font-size: 1.5em; z-index: 9999; text-align: center; color: var(--text-main); 
+}
+.gold-text { 
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: 1.2em;
+  background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C); 
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+  filter: drop-shadow(0 2px 4px rgba(255,215,0,0.3));
+}
+#captchaCode { 
+  display: none; margin-top: 20px; font-size: 1.2em; letter-spacing: .2em; 
+  background: rgba(0,0,0,0.5); border: 1px solid var(--notice-shadow); 
+  padding: 12px 18px; border-radius: 8px; font-weight: bold; color: var(--highlight-color); 
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+}
+.copy-btn { 
+  margin-top: 20px; padding: 12px 24px; 
+  background: linear-gradient(135deg, var(--btn-grad1), var(--btn-grad2)); color: var(--btn-text); 
+  font-family: 'Inter', sans-serif; font-weight: 700;
+  border:0; border-radius:8px; cursor:pointer; font-size:1em; 
+  box-shadow: 0 4px 15px var(--notice-shadow); transition: transform 0.2s;
+}
+.copy-btn:hover { transform: scale(1.05); }
+
+#devUnlockBtn{display:none;position:fixed;right:16px;bottom:16px;z-index:10001;padding:10px 14px;border:none;border-radius:999px;background:#111;color:#fff;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.25);opacity:.92}
+#devUnlockBtn:active{transform:scale(.96)}
