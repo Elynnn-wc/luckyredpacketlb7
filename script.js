@@ -52,7 +52,7 @@ const COMPANY_THEME = {
     cssClass: "theme-lb7"
   },
   RYB: {
-    bg: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop", // Elegant dark marble/abstract
+    bg: "https://i.postimg.cc/zGj3M3hV/black-gold.jpg", // Setting to a generic dark placeholder, handled mostly by css bg color fallback
     logoOverlay: "https://i.postimg.cc/wMnJztTD/RYB-4-1.png",
     caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
     bottomBanner: "https://i.postimg.cc/NfPCybLx/RYB-3-1.png",
@@ -61,7 +61,7 @@ const COMPANY_THEME = {
     cssClass: "theme-ryb"
   },
   SGB: {
-    bg: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=2670&auto=format&fit=crop", // Pristine white/gold marble
+    bg: "https://i.postimg.cc/qvsM5fWg/white-gold.jpg", // Setting to a generic light placeholder
     logoOverlay: "https://singabet.net/images/singabet/logo2.png", 
     caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
     bottomBanner: "https://i.postimg.cc/Hkn6MR7v/329426b2-1880-478e-ad09-cd0cab7fce64-removebg-preview.png", 
@@ -168,42 +168,25 @@ function setupNotice(){
   const msg = document.getElementById('unlockMsg');
   const btn = document.getElementById('startBtn');
   const packet = document.getElementById('bigRedPacket');
-  const dayEl = document.getElementById('openDayName');
 
   const forced = sessionStorage.getItem('forceUnlock') === '1';
-  const openDayNum = COMPANY_OPEN_DAY[companyId] ?? 3;
-  const openDayName = WEEKDAY_NAME[openDayNum];
 
-  if (dayEl) dayEl.textContent = openDayName;
-
-  if (isCompanyOpenToday(companyId) || forced) {
-    if (hasClaimedToday() && !forced) {
-        msg.textContent = `You have already claimed your angpao today. Come back next ${openDayName}!`;
-        btn.disabled = true;
-    } else {
-        msg.textContent = forced
-          ? 'Test mode — unlocked via Shift+R'
-          : `It's ${openDayName} — tap Start to play!`;
-        btn.disabled = false;
-        btn.onclick = ()=>{
-          gameStarted = true;
-          overlay.style.display = 'none';
-          packet.classList.remove('disabled');
-          const bg = document.getElementById('bgMusic');
-          if(bg){ bg.volume = 0.5; bg.play().catch(()=>{}); }
-          try { sessionStorage.removeItem('forceUnlock'); } catch {}
-        };
-    }
+  if (hasClaimedToday() && !forced) {
+      msg.textContent = `You have already claimed your angpao today. Come back tomorrow!`;
+      btn.disabled = true;
   } else {
-    btn.disabled = true;
-    const target = nextCompanyOpenZero(companyId);
-    const tick = ()=>{
-      const now = getKLDate();
-      const ms = target - now;
-      msg.textContent = `Unlocks on ${openDayName}. Next open in: ` + formatCountdown(ms);
-    };
-    tick();
-    setInterval(tick, 1000);
+      msg.textContent = forced
+        ? 'Test mode — unlocked via Shift+R'
+        : `Tap Start to play!`;
+      btn.disabled = false;
+      btn.onclick = ()=>{
+        gameStarted = true;
+        overlay.style.display = 'none';
+        packet.classList.remove('disabled');
+        const bg = document.getElementById('bgMusic');
+        if(bg){ bg.volume = 0.5; bg.play().catch(()=>{}); }
+        try { sessionStorage.removeItem('forceUnlock'); } catch {}
+      };
   }
 }
 
