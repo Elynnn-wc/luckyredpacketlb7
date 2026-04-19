@@ -53,7 +53,7 @@ const COMPANY_THEME = {
   },
   RYB: {
     bg: "./vip_bg.png", 
-    logoOverlay: "https://i.postimg.cc/Xvh22t3q/wei-ming-ming-de-she-ji-1-removebg-preview.png",
+    logoOverlay: "https://i.postimg.cc/wMnJztTD/RYB-4-1.png",
     caishenSprite: "https://i.postimg.cc/qBDyW26y/00243643-2.png",
     bottomBanner: "https://i.postimg.cc/NfPCybLx/RYB-3-1.png",
     packetImg: "https://i.postimg.cc/kXdsTx0s/f-IXA1-MLNWD.png",
@@ -260,6 +260,9 @@ async function openRedPacket(){
   const bg = document.getElementById('bgMusic');
   fadeOutAndStopAudio(bg, 1200);
 
+  // Capture phone linked from Daily Check-in
+  const playerPhone = q.get("phone") || "";
+
   try {
     if (window.db && captchaCode) {
       await db.collection("companies").doc(companyId)
@@ -270,6 +273,7 @@ async function openRedPacket(){
           pageId,
           rewardAmount: reward,
           captchaCode,
+          playerPhone, // LINKED HERE
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           ua: navigator.userAgent || ''
         });
@@ -290,7 +294,6 @@ async function openRedPacket(){
     captchaEl.style.display = 'block';
   });
   
-  // Set the specific storage key for TODAY
   localStorage.setItem(getClaimStorageKey(), '1');
   big.style.pointerEvents = 'none';
 }
@@ -331,13 +334,10 @@ function copyCode(){
 (function(){
   const btn = document.getElementById('devUnlockBtn');
   if(!btn) return;
-
   const isLocal = ['localhost','127.0.0.1','::1'].includes(location.hostname) || location.protocol === 'file:';
   const DEV_PIN = '741852'; 
-
   function reveal(){ btn.style.display='block'; btn.setAttribute('aria-hidden','false'); }
   if (isLocal) reveal();
-
   let taps = 0, firstTapAt = 0;
   const tryTap = ()=>{
     const now = performance.now();
@@ -355,12 +355,7 @@ function copyCode(){
     if (el) el.addEventListener('click', tryTap, true);
   });
   document.addEventListener('click', tryTap, true);
-
-  btn.addEventListener('click', ()=>{
-    try { sessionStorage.setItem('forceUnlock','1'); } catch {}
-    localStorage.clear();
-    location.reload();
-  });
+  btn.addEventListener('click', ()=>{ try { sessionStorage.setItem('forceUnlock','1'); } catch {} localStorage.clear(); location.reload(); });
 })();
 
 document.addEventListener('DOMContentLoaded', ()=>{
